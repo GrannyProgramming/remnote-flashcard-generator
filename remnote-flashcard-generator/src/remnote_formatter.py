@@ -236,8 +236,7 @@ class RemNoteFormatter:
         if hasattr(card, 'use_triple_delimiter') and card.use_triple_delimiter:
             # Use triple delimiter format: Term :::
             return f"{front} :::"
-        else:
-            # Use double delimiter + newline format
+        else:            # Use double delimiter + newline format
             back = self._escape_special_chars(card.back)
             # Replace \\n with actual line breaks for RemNote
             back_formatted = back.replace('\\n', '\n    ')
@@ -247,10 +246,13 @@ class RemNoteFormatter:
         """Format list answer cards using >>1. syntax."""
         front = self._escape_special_chars(card.front)
         
-        if hasattr(card, 'list_items') and card.list_items:
-            # Use RemNote's >>1. format for list answers
-            return f"{front} >>1."
-            # Note: The list items would be nested underneath in the hierarchy        else:
+        if hasattr(card, 'list_items') and card.list_items:            # Use RemNote's >>1. format for list answers with actual items
+            lines = [f"{front} >>1."]
+            for item in card.list_items:
+                escaped_item = self._escape_special_chars(item)
+                lines.append(f"    {escaped_item}")
+            return '\n'.join(lines)
+        else:
             # Fallback to basic format if no list items
             return f"{front} >> {self._escape_special_chars(card.back)}"
     
@@ -259,10 +261,12 @@ class RemNoteFormatter:
         front = self._escape_special_chars(card.front)
         
         if hasattr(card, 'list_items') and card.list_items and len(card.list_items) > 1:
-            # Use RemNote's >>A) format for multiple choice
-            return f"{front} >>A)"
-            # Note: The first nested item should be the correct answer
-            # RemNote will shuffle the options when displaying
+            # Use RemNote's >>A) format for multiple choice with actual options
+            lines = [f"{front} >>A)"]
+            for item in card.list_items:
+                escaped_item = self._escape_special_chars(item)
+                lines.append(f"    {escaped_item}")
+            return '\n'.join(lines)
         else:
             # Fallback to basic format if no valid multiple choice setup
             return f"{front} >> {self._escape_special_chars(card.back)}"

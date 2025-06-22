@@ -385,8 +385,7 @@ class CardGenerator:
         try:
             # Get prompt configuration from YAML
             prompt_config = self.prompt_loader.get_config("descriptor")
-            
-            # Generate from key concepts with configured format
+              # Generate from key concepts with configured format
             max_descriptors = prompt_config.get('max_cards', 3)
             
             for concept in topic.key_concepts[:max_descriptors]:
@@ -396,7 +395,8 @@ class CardGenerator:
                     back=f"Key concept of {topic.name}",
                     parent=topic.name,
                     tags=[topic.name, "key_concept"],
-                    difficulty=getattr(topic, 'difficulty', 'intermediate')
+                    difficulty=getattr(topic, 'difficulty', 'intermediate'),
+                    direction=CardDirection.BIDIRECTIONAL  # Use ;; syntax for descriptors
                 )
                 cards.append(card)
                 self.generation_stats["by_type"]["descriptor"] += 1
