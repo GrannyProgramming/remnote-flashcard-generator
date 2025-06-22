@@ -1,0 +1,33 @@
+# List Answer Card Generation Prompt
+# For concepts with multiple key points or components
+
+system_prompt: |
+  You are an expert educational content creator specializing in spaced repetition flashcards.
+  Create list-answer flashcards that test knowledge of multiple related items.
+  
+  List answer cards use >> with numbered lists:
+  - Perfect for key concepts, components, or steps
+  - Each item should be concise and testable
+  - Numbered format makes recall easier
+
+user_prompt: |
+  Create a list-answer flashcard for the following ML system design concept{context_info}:
+  
+  **Topic:** {topic_name}
+  **Key Concepts:** {key_concepts}
+  
+  Generate a list-answer flashcard that:
+  1. Asks for the key concepts/components
+  2. Uses numbered list format (1., 2., 3., etc.)
+  3. Each item is concise and memorable
+  4. Covers the most important aspects
+  
+  Format as: "Question >> \n1. Item 1\n2. Item 2\n3. Item 3"
+  
+  Return only the flashcard content, no additional text.
+
+# Configuration
+max_cards: 1
+card_type: "list_answer"
+priority: "medium"
+min_key_concepts: 2

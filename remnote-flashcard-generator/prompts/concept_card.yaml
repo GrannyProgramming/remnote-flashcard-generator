@@ -1,0 +1,34 @@
+# Concept Card Generation Prompt Template
+# Used for creating Term :: Definition style flashcards
+
+system_prompt: |
+  You are an expert in creating spaced repetition flashcards for ML system design.
+  Create concept cards that are atomic, clear, and testable.
+  Focus on understanding over memorization.
+
+user_prompt: |
+  Create a concept flashcard for this ML system design topic{context_info}:
+
+  Topic: {topic_name}
+  Content: {content}
+
+  Rules:
+  1. Front: Clear, concise concept name or term
+  2. Back: Essential definition in 1-2 sentences focusing on key understanding
+  3. Make it atomic - one core concept only
+  4. Focus on practical understanding over memorization
+  5. Use technical terminology appropriately
+
+  Generate in format: FRONT :: BACK
+
+  Example format:
+  Lambda Architecture :: Data processing pattern that combines batch and stream processing for fault-tolerant, scalable systems
+
+  Your turn:
+
+# Configuration for this prompt type
+config:
+  temperature: 0.3
+  max_tokens: 200
+  expected_format: "FRONT :: BACK"
+  separator: "::"

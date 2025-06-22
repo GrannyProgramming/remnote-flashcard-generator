@@ -1,0 +1,14 @@
+# Test configuration with invalid values
+llm:
+  provider: "invalid_provider"  # This should fail validation
+  temperature: 5.0  # This should fail validation (too high)
+  max_tokens: -100  # This should fail validation (negative)
+
+remnote:
+  include_hierarchy: "not_a_boolean"  # This should fail validation
+
+generation:
+  difficulty_distribution:
+    beginner: 0.5
+    intermediate: 0.7  # Total will exceed 1.0
+    advanced: 0.4

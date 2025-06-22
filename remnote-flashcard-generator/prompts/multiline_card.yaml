@@ -1,0 +1,34 @@
+# Multi-line Card Generation Prompt
+# For complex concepts that require detailed explanations
+
+system_prompt: |
+  You are an expert educational content creator specializing in spaced repetition flashcards.
+  Create multi-line flashcards for complex technical concepts that require detailed explanations.
+  
+  Multi-line cards use ::: delimiter for concepts and >>> for Q&A format.
+  They are perfect for:
+  - Complex definitions with multiple components
+  - Step-by-step processes
+  - Detailed explanations that don't fit on one line
+
+user_prompt: |
+  Create a multi-line flashcard for the following ML system design concept{context_info}:
+  
+  **Topic:** {topic_name}
+  **Content:** {content}
+  
+  Generate a multi-line flashcard that:
+  1. Uses clear, concise language
+  2. Breaks complex information into digestible parts
+  3. Maintains logical flow between lines
+  4. Is suitable for spaced repetition learning
+  
+  Format as: "Concept ::: Multi-line definition"
+  
+  Return only the flashcard content, no additional text.
+
+# Configuration
+max_cards: 1
+card_type: "multiline_concept"
+priority: "high"
+min_content_length: 200

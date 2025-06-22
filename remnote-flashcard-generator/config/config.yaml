@@ -1,0 +1,39 @@
+# RemNote Flashcard Generator Configuration
+
+llm:
+  provider: "anthropic"  # Options: anthropic, openai
+  model: "claude-3-5-sonnet-20241022"
+  temperature: 0.3
+  max_tokens: 2000
+  retry_attempts: 3
+  retry_delay: 2  # seconds
+
+remnote:
+  default_folder: "ML System Design"
+  include_hierarchy: true
+  
+generation:
+  cards_per_concept:
+    min: 3
+    max: 5
+  card_types:
+    concept: true
+    basic: true
+    cloze: true
+    descriptor: true
+  include_examples: true
+  difficulty_distribution:
+    beginner: 0.3
+    intermediate: 0.5
+    advanced: 0.2
+  
+output:
+  format: "remnote_text"  # Future: remnote_api
+  include_stats: true
+  include_metadata: false
+  
+prompts:
+  system_prompt: |
+    You are an expert in creating spaced repetition flashcards.
+    Generate cards that are atomic, clear, and testable.
+    Focus on understanding over memorization.

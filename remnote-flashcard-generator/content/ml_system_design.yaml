@@ -1,0 +1,278 @@
+ml_system_design:
+  metadata:
+    subject: "ML System Design Interview Prep"
+    author: "ML Engineer"
+    version: "1.0"
+    difficulty: "intermediate"
+    card_types: ["concept", "basic", "cloze", "descriptor"]
+    
+  topics:
+    - name: "Lambda Architecture"
+      content: |
+        Lambda architecture is a data processing architecture designed to handle massive
+        quantities of data by taking advantage of both batch and stream processing methods.
+        It addresses the need for a robust, fault-tolerant, scalable system that can serve
+        a wide range of workloads and use cases. The architecture consists of three layers:
+        batch layer for comprehensive processing, speed layer for real-time processing,
+        and serving layer for query responses.
+      subtopics:
+        - name: "Batch Layer"
+          content: |
+            The batch layer precomputes results using a distributed processing system
+            that can handle very large quantities of data. The batch layer stores the
+            master dataset and precomputes batch views. Output is typically stored
+            in a read-only database, with updates completely replacing existing results.
+            This layer prioritizes accuracy and completeness over latency.
+        - name: "Speed Layer"
+          content: |
+            The speed layer processes data streams in real time and without the
+            requirements of fix-ups or completeness. This layer sacrifices throughput
+            for reduced latency. It processes only recent data and its views are
+            eventually superseded by the batch layer. Uses technologies like Storm,
+            Kafka Streams, or Flink for real-time processing.
+        - name: "Serving Layer"
+          content: |
+            The serving layer responds to ad-hoc queries by returning precomputed
+            views or building views from the processed data. It indexes and exposes
+            the batch views so they can be queried with low latency. Technologies
+            include Cassandra, HBase, or Elasticsearch for serving precomputed views.
+      examples:
+        - "Netflix recommendation system combining batch ML training with real-time serving"
+        - "LinkedIn's data infrastructure for member feeds and analytics"
+        - "Twitter's trending topics system processing tweets in real-time"
+        - "Uber's surge pricing system combining historical and real-time demand data"
+      key_concepts:
+        - "Immutable data storage"
+        - "Recomputation for fault tolerance"
+        - "CAP theorem trade-offs"
+        - "Human fault tolerance"
+        - "Batch vs stream processing trade-offs"
+        
+    - name: "Feature Store"
+      content: |
+        A feature store is a centralized repository where features are stored and
+        organized for use across different machine learning models. It ensures
+        consistency between training and serving environments, enabling feature
+        reuse, versioning, and monitoring. Key benefits include reduced training-serving
+        skew, improved feature discovery, and standardized feature engineering.
+      subtopics:
+        - name: "Online Feature Store"
+          content: |
+            Online feature stores serve features in real-time for model inference
+            with low latency requirements (typically <100ms). They use key-value
+            stores or in-memory databases optimized for fast reads. Common technologies
+            include Redis, DynamoDB, or Cassandra.
+        - name: "Offline Feature Store"
+          content: |
+            Offline feature stores provide features for model training and batch
+            inference. They can handle large-scale data processing and complex
+            feature computations. Built on data warehouses like BigQuery, Snowflake,
+            or data lakes with Spark processing.
+        - name: "Feature Registry"
+          content: |
+            Feature registry acts as a metadata layer that tracks feature definitions,
+            lineage, ownership, and documentation. It provides discoverability and
+            governance for features across the organization.
+      key_concepts:
+        - "Training-serving consistency"
+        - "Feature versioning and lineage"
+        - "Online vs offline feature serving"
+        - "Feature monitoring and drift detection"
+        - "Point-in-time correctness"
+        - "Feature sharing and reuse"
+      examples:
+        - "Uber's Michelangelo platform"
+        - "Airbnb's Zipline feature store"
+        - "Netflix's feature store for recommendations"
+        - "DoorDash's feature platform"
+
+    - name: "Model Serving Patterns"
+      content: |
+        Model serving patterns describe different approaches to deploy and serve
+        machine learning models in production. The choice depends on latency
+        requirements, throughput needs, model complexity, and infrastructure
+        constraints. Common patterns include batch prediction, online serving,
+        streaming inference, and edge deployment.
+      subtopics:
+        - name: "Batch Prediction"
+          content: |
+            Batch prediction processes large volumes of data at scheduled intervals.
+            Suitable for use cases where real-time predictions aren't required.
+            Results are typically stored in databases or files for later retrieval.
+            Examples include daily recommendation updates or monthly churn predictions.
+        - name: "Online Serving"
+          content: |
+            Online serving provides real-time predictions via API endpoints with
+            low latency requirements. Models are loaded in memory and serve
+            individual prediction requests. Requires load balancing, auto-scaling,
+            and health monitoring.
+        - name: "Streaming Inference"
+          content: |
+            Streaming inference processes continuous data streams and produces
+            predictions in near real-time. Combines stream processing frameworks
+            with model serving infrastructure. Used for fraud detection, anomaly
+            detection, and real-time personalization.
+      key_concepts:
+        - "Latency vs throughput trade-offs"
+        - "Model versioning and rollback"
+        - "A/B testing infrastructure"
+        - "Canary deployments"
+        - "Auto-scaling strategies"
+      examples:
+        - "Google's TensorFlow Serving"
+        - "Amazon SageMaker endpoints"
+        - "MLflow model serving"
+        - "Kubernetes-based model deployments"
+
+    - name: "Data Pipeline Architecture"
+      content: |
+        Data pipeline architecture refers to the design and implementation of
+        systems that move, transform, and process data from source to destination.
+        Modern pipelines handle both batch and streaming data, ensure data quality,
+        and provide monitoring and observability. Key considerations include
+        scalability, fault tolerance, data lineage, and cost optimization.
+      subtopics:
+        - name: "ETL vs ELT"
+          content: |
+            ETL (Extract, Transform, Load) transforms data before loading into
+            the destination, while ELT (Extract, Load, Transform) loads raw data
+            first and transforms it in the destination system. ELT is becoming
+            more popular with cloud data warehouses that can handle transformation
+            at scale.
+        - name: "Stream Processing"
+          content: |
+            Stream processing handles continuous data flows with low latency.
+            Technologies include Apache Kafka, Apache Flink, and Apache Storm.
+            Enables real-time analytics, monitoring, and decision-making.
+        - name: "Data Quality"
+          content: |
+            Data quality encompasses completeness, accuracy, consistency, and
+            timeliness of data. Implemented through validation rules, schema
+            enforcement, anomaly detection, and data profiling.
+      key_concepts:
+        - "Data lineage and provenance"
+        - "Schema evolution"
+        - "Backpressure handling"
+        - "Exactly-once processing"
+        - "Data partitioning strategies"
+      examples:
+        - "Spotify's event delivery system"
+        - "Airbnb's data pipeline infrastructure"
+        - "Netflix's data pipeline for content recommendations"
+
+    - name: "Distributed Training"
+      content: |
+        Distributed training enables training machine learning models across
+        multiple machines or GPUs to handle large datasets and complex models.
+        Key approaches include data parallelism, model parallelism, and pipeline
+        parallelism. Challenges include communication overhead, fault tolerance,
+        and load balancing across workers.
+      subtopics:
+        - name: "Data Parallelism"
+          content: |
+            Data parallelism distributes training data across multiple workers,
+            each maintaining a copy of the full model. Workers compute gradients
+            independently and synchronize through parameter servers or all-reduce
+            operations. Most common approach for distributed training.
+        - name: "Model Parallelism"
+          content: |
+            Model parallelism splits the model itself across multiple devices
+            when the model is too large to fit on a single device. Different
+            parts of the model are computed on different devices, requiring
+            careful coordination of forward and backward passes.
+        - name: "Parameter Server"
+          content: |
+            Parameter server architecture uses dedicated servers to store and
+            update model parameters while worker nodes compute gradients.
+            Provides centralized parameter management but can become a bottleneck
+            for communication-intensive workloads.
+      key_concepts:
+        - "Gradient synchronization strategies"
+        - "Communication vs computation trade-offs"
+        - "Fault tolerance and recovery"
+        - "Dynamic scaling of workers"
+        - "Gradient compression techniques"
+      examples:
+        - "Google's TensorFlow distributed training"
+        - "Facebook's PyTorch distributed training"
+        - "Horovod for distributed deep learning"
+
+    - name: "Model Monitoring"
+      content: |
+        Model monitoring involves tracking model performance, data quality,
+        and system health in production. It helps detect model drift, data
+        drift, and performance degradation. Key metrics include accuracy,
+        latency, throughput, error rates, and business metrics. Monitoring
+        enables proactive model maintenance and retraining decisions.
+      subtopics:
+        - name: "Data Drift Detection"
+          content: |
+            Data drift occurs when the statistical properties of input data
+            change over time. Detection methods include statistical tests,
+            distribution comparisons, and machine learning-based approaches.
+            Common causes include seasonality, user behavior changes, and
+            external factors.
+        - name: "Model Drift Detection"
+          content: |
+            Model drift refers to degradation in model performance over time
+            due to changes in the underlying data patterns. Monitored through
+            accuracy metrics, prediction confidence, and business KPIs.
+            Triggers retraining or model updates.
+        - name: "Performance Monitoring"
+          content: |
+            Performance monitoring tracks system-level metrics like latency,
+            throughput, error rates, and resource utilization. Essential for
+            maintaining SLA requirements and optimizing infrastructure costs.
+      key_concepts:
+        - "Statistical significance testing"
+        - "Alerting and notification systems"
+        - "Baseline establishment"
+        - "Continuous evaluation pipelines"
+        - "Model performance degradation patterns"
+      examples:
+        - "WhyLabs for ML monitoring"
+        - "Evidently AI for drift detection"
+        - "Amazon SageMaker Model Monitor"
+        - "Custom monitoring dashboards"
+
+    - name: "ML Infrastructure Scaling"
+      content: |
+        ML infrastructure scaling involves designing systems that can handle
+        increasing data volumes, model complexity, and user demands. Key
+        considerations include horizontal vs vertical scaling, auto-scaling
+        strategies, resource optimization, and cost management. Modern
+        approaches leverage containerization, orchestration, and cloud-native
+        technologies.
+      subtopics:
+        - name: "Horizontal Scaling"
+          content: |
+            Horizontal scaling adds more machines to handle increased load.
+            For ML workloads, this includes distributing training across
+            multiple nodes, serving models from multiple replicas, and
+            partitioning data processing. Requires careful load balancing
+            and state management.
+        - name: "Auto-scaling"
+          content: |
+            Auto-scaling automatically adjusts resource allocation based on
+            demand. For ML systems, this includes scaling model serving
+            replicas based on request volume, scaling training clusters
+            based on job queue length, and scaling data processing based
+            on data volume.
+        - name: "Resource Optimization"
+          content: |
+            Resource optimization involves efficient utilization of compute,
+            memory, and storage resources. Techniques include model
+            quantization, pruning, knowledge distillation, and mixed-precision
+            training. Also includes scheduling optimization and resource
+            sharing strategies.
+      key_concepts:
+        - "Load balancing strategies"
+        - "Container orchestration"
+        - "Resource quotas and limits"
+        - "Cost optimization techniques"
+        - "Performance vs cost trade-offs"
+      examples:
+        - "Kubernetes for ML workload orchestration"
+        - "Ray for distributed ML computing"
+        - "Kubeflow for ML pipeline scaling"
+        - "AWS Batch for large-scale training"

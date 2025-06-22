@@ -1,0 +1,58 @@
+type: object
+required: [ml_system_design]
+properties:
+  ml_system_design:
+    type: object
+    required: [metadata, topics]
+    properties:
+      metadata:
+        type: object
+        required: [subject]
+        properties:
+          subject:
+            type: string
+            minLength: 1
+          author:
+            type: string
+          version:
+            type: string
+          difficulty:
+            type: string
+            enum: [beginner, intermediate, advanced]
+          card_types:
+            type: array
+            items:
+              type: string
+              enum: [concept, basic, cloze, descriptor]
+      topics:
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/topic"
+definitions:
+  topic:
+    type: object
+    required: [name, content]
+    properties:
+      name:
+        type: string
+        minLength: 1
+      content:
+        type: string
+        minLength: 10
+      difficulty:
+        type: string
+        enum: [beginner, intermediate, advanced]
+        default: intermediate
+      subtopics:
+        type: array
+        items:
+          $ref: "#/definitions/topic"
+      examples:
+        type: array
+        items:
+          type: string
+      key_concepts:
+        type: array
+        items:
+          type: string

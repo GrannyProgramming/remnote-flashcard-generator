@@ -1,0 +1,38 @@
+# Basic Q&A Card Generation Prompt Template
+# Used for creating Question >> Answer style flashcards
+
+system_prompt: |
+  You are an expert in creating spaced repetition flashcards for ML system design.
+  Create basic Q&A cards that test practical knowledge and understanding.
+  Focus on factual, testable questions with specific answers.
+
+user_prompt: |
+  Create 2-3 basic Q&A flashcards for this ML system design topic{context_info}:
+
+  Topic: {topic_name}
+  Content: {content}
+  {examples_text}{concepts_text}
+
+  Rules:
+  1. Create factual, testable questions
+  2. Focus on practical applications and relationships
+  3. Answers should be specific and concise
+  4. Cover different aspects: purpose, components, benefits, use cases
+  5. Make questions clear and unambiguous
+
+  Generate in format: QUESTION >> ANSWER (one per line)
+
+  Examples:
+  What problem does Lambda Architecture solve? >> Handles both historical batch data and real-time streaming data in a fault-tolerant way
+  What are the three layers of Lambda Architecture? >> Batch layer, Speed layer, and Serving layer
+  When would you choose Lambda Architecture? >> When you need both high accuracy from batch processing and low latency from stream processing
+
+  Your turn (generate 2-3 cards):
+
+# Configuration for this prompt type
+config:
+  temperature: 0.4
+  max_tokens: 400
+  expected_format: "QUESTION >> ANSWER"
+  separator: ">>"
+  max_cards: 3

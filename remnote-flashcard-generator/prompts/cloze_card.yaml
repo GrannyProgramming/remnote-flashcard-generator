@@ -1,0 +1,37 @@
+# Cloze Deletion Card Generation Prompt Template
+# Used for creating text with {{hidden}} parts
+
+system_prompt: |
+  You are an expert in creating spaced repetition flashcards for ML system design.
+  Create cloze deletion cards that test specific knowledge through fill-in-the-blank format.
+  Focus on lists, sequences, and important relationships.
+
+user_prompt: |
+  Create 1-2 cloze deletion flashcards for this ML system design topic{context_info}:
+
+  Topic: {topic_name}
+  Content: {content}
+  {examples_text}{concepts_text}
+
+  Rules:
+  1. Create sentences with {{key terms}} in double braces for deletion
+  2. Focus on lists, sequences, or important relationships
+  3. Each sentence should test specific knowledge
+  4. Make deletions meaningful - not obvious from context
+  5. Keep sentences clear and complete
+
+  Generate sentences with {{deletions}} (one per line)
+
+  Examples:
+  Lambda Architecture consists of three layers: {{Batch layer}}, {{Speed layer}}, and {{Serving layer}}
+  The {{Batch layer}} provides high accuracy while the {{Speed layer}} ensures low latency
+
+  Your turn (generate 1-2 cloze cards):
+
+# Configuration for this prompt type
+config:
+  temperature: 0.3
+  max_tokens: 300
+  expected_format: "Text with {{deletions}}"
+  cloze_pattern: "{{(.*?)}}"
+  max_cards: 2

@@ -1,0 +1,40 @@
+# Enhanced Descriptor Card Generation Prompt Template
+# Used for creating meaningful Attribute ;; Value style flashcards
+
+system_prompt: |
+  You are an expert in creating spaced repetition flashcards for ML system design.
+  Create descriptor cards that define specific attributes of concepts with clear, testable relationships.
+  Focus on practical attributes that help distinguish and understand concepts.
+
+user_prompt: |
+  Create 2-3 descriptor flashcards for attributes of this ML system design concept{context_info}:
+
+  **Parent Concept:** {topic_name}
+  **Content:** {content}
+  **Key Concepts:** {key_concepts}
+
+  Rules:
+  1. Descriptors describe specific attributes of the parent concept
+  2. Format: attribute_name ;; description_of_attribute_in_relation_to_parent
+  3. Keep attribute names lowercase and concise (purpose, components, advantages, limitations, use_cases, etc.)
+  4. Descriptions should explain how the attribute relates to the parent concept
+  5. Focus on practical, testable knowledge that helps understanding
+  
+  Common ML system attributes:
+  - purpose ;; What problem does this solve?
+  - components ;; What are the main parts?
+  - advantages ;; What benefits does it provide?
+  - limitations ;; What are the drawbacks?
+  - use_cases ;; When should this be used?
+  - scalability ;; How does it handle growth?
+  - complexity ;; How difficult is it to implement?
+
+  Generate 2-3 meaningful descriptors for {topic_name}:
+
+# Configuration for this prompt type
+config:
+  temperature: 0.3
+  max_tokens: 300
+  expected_format: "attribute ;; description"
+  separator: ";;"
+  max_cards: 3
