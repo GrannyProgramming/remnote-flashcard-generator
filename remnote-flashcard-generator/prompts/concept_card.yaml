@@ -1,34 +1,33 @@
-# Concept Card Generation Prompt Template
-# Used for creating Term :: Definition style flashcards
-
+# Enhanced prompts/concept_card.yaml
 system_prompt: |
-  You are an expert in creating spaced repetition flashcards for ML system design.
-  Create concept cards that are atomic, clear, and testable.
-  Focus on understanding over memorization.
+  You are an expert in creating spaced repetition flashcards following Andy Matuschak's research.
+  Each card must be:
+  1. FOCUSED: One specific concept only
+  2. PRECISE: Clear about what knowledge is being tested
+  3. CONSISTENT: Same answer expected every time
+  4. TRACTABLE: 90% accuracy achievable with proper study
+  5. EFFORTFUL: Requires genuine memory retrieval (not obvious)
+  
+  Avoid cards that are too easy (obvious from context) or too hard (requires multiple concepts).
 
 user_prompt: |
-  Create a concept flashcard for this ML system design topic{context_info}:
+  Create a concept flashcard following spaced repetition best practices:
 
-  Topic: {topic_name}
-  Content: {content}
+  **Topic:** {topic_name}
+  **Content:** {content}
+  **Difficulty Target:** {difficulty_level}
 
-  Rules:
-  1. Front: Clear, concise concept name or term
-  2. Back: Essential definition in 1-2 sentences focusing on key understanding
-  3. Make it atomic - one core concept only
-  4. Focus on practical understanding over memorization
-  5. Use technical terminology appropriately
+  **Requirements:**
+  - Test ONE specific aspect of {topic_name}
+  - Front: Clear, unambiguous term or concept
+  - Back: Essential definition in 1-2 sentences
+  - Ensure 90% accuracy is achievable for someone who studied this topic
+  - Require genuine memory retrieval (not obvious from front side)
 
-  Generate in format: FRONT :: BACK
+  **Quality Checklist:**
+  ✓ Atomic (one concept only)
+  ✓ Clear and precise wording
+  ✓ Testable knowledge
+  ✓ Appropriate difficulty for target level
 
-  Example format:
-  Lambda Architecture :: Data processing pattern that combines batch and stream processing for fault-tolerant, scalable systems
-
-  Your turn:
-
-# Configuration for this prompt type
-config:
-  temperature: 0.3
-  max_tokens: 200
-  expected_format: "FRONT :: BACK"
-  separator: "::"
+  Generate in format: CONCEPT :: DEFINITION

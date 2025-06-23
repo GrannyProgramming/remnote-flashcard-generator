@@ -7,34 +7,37 @@ system_prompt: |
   Focus on practical attributes that help distinguish and understand concepts.
 
 user_prompt: |
-  Create 2-3 descriptor flashcards for attributes of this ML system design concept{context_info}:
+  Create 2-3 descriptor flashcards that ask about specific attributes of this ML system design concept{context_info}:
 
   **Parent Concept:** {topic_name}
   **Content:** {content}
   **Key Concepts:** {key_concepts}
 
   Rules:
-  1. Descriptors describe specific attributes of the parent concept
-  2. Format: attribute_name ;; description_of_attribute_in_relation_to_parent
-  3. Keep attribute names lowercase and concise (purpose, components, advantages, limitations, use_cases, etc.)
-  4. Descriptions should explain how the attribute relates to the parent concept
-  5. Focus on practical, testable knowledge that helps understanding
+  1. Create question-answer pairs about specific attributes of {topic_name}
+  2. Format: What [attribute] does [concept/component] [serve/provide/solve] for {topic_name}? ;; [concise answer]
+  3. Focus on meaningful relationships between components and the parent concept
+  4. Questions should test understanding of WHY components exist in the system
+  5. Answers should be concise but complete (1-2 sentences max)
   
-  Common ML system attributes:
-  - purpose ;; What problem does this solve?
-  - components ;; What are the main parts?
-  - advantages ;; What benefits does it provide?
-  - limitations ;; What are the drawbacks?
-  - use_cases ;; When should this be used?
-  - scalability ;; How does it handle growth?
-  - complexity ;; How difficult is it to implement?
+  Good descriptor question patterns:
+  - What problem does [component] solve for {topic_name}?
+  - What purpose does [feature] serve in {topic_name}?
+  - What advantage does [characteristic] provide to {topic_name}?
+  - What limitation does [aspect] create for {topic_name}?
+  - What role does [element] play in {topic_name}?
 
-  Generate 2-3 meaningful descriptors for {topic_name}:
+  Examples of good descriptor cards:
+  - What problem does immutable data storage solve for Lambda Architecture? ;; Prevents data corruption and enables reliable reprocessing of historical data
+  - What purpose does the speed layer serve in Lambda Architecture? ;; Provides low-latency processing for real-time analytics while batch layer catches up
+  - What advantage does horizontal scaling provide to microservices? ;; Allows independent scaling of individual services based on demand
+
+  Generate 2-3 descriptor cards for {topic_name}:
 
 # Configuration for this prompt type
 config:
   temperature: 0.3
   max_tokens: 300
-  expected_format: "attribute ;; description"
+  expected_format: "question ;; answer"
   separator: ";;"
   max_cards: 3
