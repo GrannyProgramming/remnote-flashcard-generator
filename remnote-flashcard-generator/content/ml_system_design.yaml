@@ -1,10 +1,11 @@
 ml_system_design:
   metadata:
-    subject: "ML System Design Interview Prep"
-    author: "ML Engineer"
-    version: "1.0"
-    difficulty: "intermediate"
+    subject: "ML System Design Interview Prep - Senior MLOps Engineer"
+    author: "Senior ML Engineer"
+    version: "2.0"
+    difficulty: "advanced"
     card_types: ["concept", "basic", "cloze", "descriptor"]
+    interview_focus: "2025 Senior MLOps Engineer Positions"
     
   topics:
     - name: "Lambda Architecture"
@@ -14,7 +15,9 @@ ml_system_design:
         It addresses the need for a robust, fault-tolerant, scalable system that can serve
         a wide range of workloads and use cases. The architecture consists of three layers:
         batch layer for comprehensive processing, speed layer for real-time processing,
-        and serving layer for query responses.
+        and serving layer for query responses. Critical for senior MLOps interviews as it
+        demonstrates understanding of CAP theorem trade-offs and architectural decision-making
+        for systems processing 10M+ predictions per second like Uber's platform.
       subtopics:
         - name: "Batch Layer"
           content: |
@@ -22,32 +25,38 @@ ml_system_design:
             that can handle very large quantities of data. The batch layer stores the
             master dataset and precomputes batch views. Output is typically stored
             in a read-only database, with updates completely replacing existing results.
-            This layer prioritizes accuracy and completeness over latency.
+            This layer prioritizes accuracy and completeness over latency. Modern implementations
+            use Apache Spark on Kubernetes, Databricks Delta Lake, or Google Dataflow for
+            petabyte-scale processing with exactly-once semantics.
         - name: "Speed Layer"
           content: |
-            The speed layer processes data streams in real time and without the
+            The speed layer processes data streams in real time without the
             requirements of fix-ups or completeness. This layer sacrifices throughput
             for reduced latency. It processes only recent data and its views are
-            eventually superseded by the batch layer. Uses technologies like Storm,
-            Kafka Streams, or Flink for real-time processing.
+            eventually superseded by the batch layer. Uses technologies like Apache
+            Kafka with Kafka Streams, Apache Flink, or Pulsar for real-time processing.
+            Critical for sub-second response times in fraud detection and recommendation systems.
         - name: "Serving Layer"
           content: |
             The serving layer responds to ad-hoc queries by returning precomputed
             views or building views from the processed data. It indexes and exposes
             the batch views so they can be queried with low latency. Technologies
-            include Cassandra, HBase, or Elasticsearch for serving precomputed views.
+            include Apache Cassandra, HBase, Elasticsearch, or cloud-native solutions
+            like DynamoDB and Bigtable. Must handle 100K+ QPS with <10ms p95 latency.
       examples:
-        - "Netflix recommendation system combining batch ML training with real-time serving"
-        - "LinkedIn's data infrastructure for member feeds and analytics"
-        - "Twitter's trending topics system processing tweets in real-time"
-        - "Uber's surge pricing system combining historical and real-time demand data"
+        - "Netflix recommendation system handling 200M+ users with sub-second responses"
+        - "LinkedIn's data infrastructure processing 1B+ member interactions daily"
+        - "Twitter's trending topics processing 500M+ tweets daily"
+        - "Uber's surge pricing processing 15M+ trips daily with real-time demand forecasting"
+        - "Spotify's music recommendations combining 400M+ users' listening patterns"
       key_concepts:
-        - "Immutable data storage"
-        - "Recomputation for fault tolerance"
-        - "CAP theorem trade-offs"
-        - "Human fault tolerance"
-        - "Batch vs stream processing trade-offs"
-        
+        - "Immutable data storage and event sourcing"
+        - "Recomputation for fault tolerance and human error recovery"
+        - "CAP theorem trade-offs in distributed systems"
+        - "Exactly-once processing semantics"
+        - "Batch vs stream processing trade-offs and cost implications"
+        - "Data freshness vs consistency guarantees"
+
     - name: "Feature Store"
       content: |
         A feature store is a centralized repository where features are stored and
@@ -55,36 +64,55 @@ ml_system_design:
         consistency between training and serving environments, enabling feature
         reuse, versioning, and monitoring. Key benefits include reduced training-serving
         skew, improved feature discovery, and standardized feature engineering.
+        Critical for enterprises with 100+ models where feature consistency becomes
+        a major operational challenge. Modern feature stores handle point-in-time
+        correctness for historical feature values and streaming feature computation.
       subtopics:
         - name: "Online Feature Store"
           content: |
             Online feature stores serve features in real-time for model inference
-            with low latency requirements (typically <100ms). They use key-value
+            with low latency requirements (typically <10ms p95). They use key-value
             stores or in-memory databases optimized for fast reads. Common technologies
-            include Redis, DynamoDB, or Cassandra.
+            include Redis Cluster, DynamoDB with DAX, Apache Cassandra, or specialized
+            solutions like Tecton's managed service. Must handle millions of feature
+            retrievals per second with 99.99% availability.
         - name: "Offline Feature Store"
           content: |
             Offline feature stores provide features for model training and batch
             inference. They can handle large-scale data processing and complex
             feature computations. Built on data warehouses like BigQuery, Snowflake,
-            or data lakes with Spark processing.
+            Databricks Delta Lake, or data lakes with Spark processing. Support
+            time-travel queries for historical training data and feature backfill
+            operations across petabytes of data.
         - name: "Feature Registry"
           content: |
             Feature registry acts as a metadata layer that tracks feature definitions,
             lineage, ownership, and documentation. It provides discoverability and
-            governance for features across the organization.
+            governance for features across the organization. Implements schema evolution,
+            data quality monitoring, and access controls. Critical for regulatory
+            compliance and model governance in enterprise environments.
+        - name: "Streaming Feature Pipeline"
+          content: |
+            Real-time feature computation from streaming data sources using Apache
+            Kafka, Pulsar, or cloud streaming services. Handles late-arriving data,
+            out-of-order events, and temporal aggregations. Essential for features
+            like user session behavior, recent transaction patterns, or real-time
+            model outputs as features for downstream models.
       key_concepts:
-        - "Training-serving consistency"
-        - "Feature versioning and lineage"
-        - "Online vs offline feature serving"
+        - "Training-serving consistency and skew prevention"
+        - "Feature versioning and backward compatibility"
+        - "Online vs offline feature serving latency requirements"
         - "Feature monitoring and drift detection"
-        - "Point-in-time correctness"
-        - "Feature sharing and reuse"
+        - "Point-in-time correctness for temporal joins"
+        - "Feature sharing and reuse across teams"
+        - "Data lineage and impact analysis"
+        - "Feature store orchestration with model deployment"
       examples:
-        - "Uber's Michelangelo platform"
-        - "Airbnb's Zipline feature store"
-        - "Netflix's feature store for recommendations"
-        - "DoorDash's feature platform"
+        - "Uber's Michelangelo platform with 10,000+ features serving 500+ models"
+        - "Airbnb's Zipline processing 100M+ bookings with real-time features"
+        - "Netflix's feature store supporting 1000+ recommendation experiments"
+        - "DoorDash's feature platform handling 1B+ delivery predictions daily"
+        - "Feast open-source adoption at Gojek for Southeast Asia ride-hailing"
 
     - name: "Model Serving Patterns"
       content: |
@@ -92,37 +120,223 @@ ml_system_design:
         machine learning models in production. The choice depends on latency
         requirements, throughput needs, model complexity, and infrastructure
         constraints. Common patterns include batch prediction, online serving,
-        streaming inference, and edge deployment.
+        streaming inference, and edge deployment. Senior MLOps engineers must
+        understand the trade-offs between latency, throughput, cost, and complexity
+        for systems serving millions of predictions per second.
       subtopics:
         - name: "Batch Prediction"
           content: |
             Batch prediction processes large volumes of data at scheduled intervals.
             Suitable for use cases where real-time predictions aren't required.
             Results are typically stored in databases or files for later retrieval.
-            Examples include daily recommendation updates or monthly churn predictions.
+            Modern implementations use distributed computing frameworks like Spark,
+            Ray, or cloud-native batch services. Can process terabytes of data with
+            cost-effective spot instances and automatic scaling.
         - name: "Online Serving"
           content: |
             Online serving provides real-time predictions via API endpoints with
-            low latency requirements. Models are loaded in memory and serve
+            low latency requirements (<100ms p95). Models are loaded in memory and serve
             individual prediction requests. Requires load balancing, auto-scaling,
-            and health monitoring.
+            circuit breakers, and health monitoring. Must handle traffic spikes
+            and graceful degradation. Technologies include TensorFlow Serving,
+            TorchServe, BentoML, KServe, or cloud-managed endpoints.
         - name: "Streaming Inference"
           content: |
             Streaming inference processes continuous data streams and produces
             predictions in near real-time. Combines stream processing frameworks
             with model serving infrastructure. Used for fraud detection, anomaly
-            detection, and real-time personalization.
+            detection, and real-time personalization. Handles backpressure,
+            late-arriving data, and exactly-once processing semantics.
+        - name: "Edge Deployment"
+          content: |
+            Edge deployment brings models closer to data sources and users for
+            reduced latency and improved privacy. Involves model optimization
+            techniques like quantization, pruning, and knowledge distillation.
+            Uses frameworks like TensorFlow Lite, ONNX Runtime, or specialized
+            edge computing platforms. Critical for mobile apps, IoT devices,
+            and autonomous vehicles.
       key_concepts:
-        - "Latency vs throughput trade-offs"
-        - "Model versioning and rollback"
-        - "A/B testing infrastructure"
-        - "Canary deployments"
-        - "Auto-scaling strategies"
+        - "Latency vs throughput vs cost trade-offs"
+        - "Model versioning, A/B testing, and canary deployments"
+        - "Auto-scaling strategies and capacity planning"
+        - "Circuit breakers and graceful degradation"
+        - "Multi-model serving and resource sharing"
+        - "GPU vs CPU serving cost optimization"
+        - "Model compression and quantization techniques"
+        - "Inference caching and memoization strategies"
       examples:
-        - "Google's TensorFlow Serving"
-        - "Amazon SageMaker endpoints"
-        - "MLflow model serving"
-        - "Kubernetes-based model deployments"
+        - "Google's TensorFlow Serving handling 1M+ QPS for Search and YouTube"
+        - "Amazon SageMaker endpoints with multi-model hosting"
+        - "MLflow model serving with Kubernetes auto-scaling"
+        - "Ray Serve for LLM serving with dynamic batching"
+        - "KServe for cloud-native model serving with Knative"
+        - "BentoML for ML model deployment with Docker and Kubernetes"
+
+    - name: "LLMOps and Generative AI Systems"
+      content: |
+        LLMOps represents the specialized MLOps practices for Large Language Models
+        and generative AI systems. It addresses unique challenges like massive
+        computational requirements, prompt engineering at scale, high-throughput
+        inference, fine-tuning pipelines, and responsible AI deployment. Critical
+        for 2025 interviews as 60%+ of ML engineering roles now involve LLMs.
+        Requires understanding of transformer architectures, distributed inference,
+        and prompt management systems.
+      subtopics:
+        - name: "LLM Training Infrastructure"
+          content: |
+            Infrastructure for training models with billions to trillions of parameters
+            using distributed training across hundreds of GPUs or TPUs. Involves
+            techniques like ZeRO optimizer states, gradient checkpointing, and
+            mixed precision training. Modern implementations use frameworks like
+            DeepSpeed, FairScale, or cloud-native solutions like Google TPU pods
+            and AWS Trainium. Training costs can exceed $1M for large models.
+        - name: "LLM Serving and Inference"
+          content: |
+            High-throughput, low-latency serving of large language models using
+            techniques like dynamic batching, KV-cache optimization, and model
+            parallelism. Technologies include vLLM, Text Generation Inference (TGI),
+            NVIDIA Triton, or cloud services like OpenAI API, Anthropic Claude,
+            and Google Vertex AI. Must handle thousands of concurrent requests
+            with intelligent load balancing and auto-scaling.
+        - name: "Prompt Engineering and Management"
+          content: |
+            Systematic approach to designing, testing, and versioning prompts for
+            LLM applications. Includes prompt templating, few-shot learning examples,
+            chain-of-thought prompting, and prompt injection prevention. Requires
+            version control systems, A/B testing frameworks, and performance
+            monitoring for prompt effectiveness across different use cases.
+        - name: "Fine-tuning and RLHF Pipelines"
+          content: |
+            Pipelines for fine-tuning pre-trained models using techniques like
+            LoRA, QLoRA, instruction tuning, and Reinforcement Learning from
+            Human Feedback (RLHF). Includes data collection, human annotation,
+            reward model training, and policy optimization. Critical for creating
+            domain-specific models and improving alignment with human preferences.
+      key_concepts:
+        - "Transformer architecture and attention mechanisms"
+        - "Parameter-efficient fine-tuning (PEFT) techniques"
+        - "Distributed training strategies for large models"
+        - "Inference optimization and serving patterns"
+        - "Prompt injection and jailbreaking prevention"
+        - "Constitutional AI and safety filtering"
+        - "Model compression and quantization for deployment"
+        - "Multi-modal pipeline management"
+      examples:
+        - "OpenAI's GPT-4 training and serving infrastructure"
+        - "Anthropic's Constitutional AI and Claude deployment"
+        - "Google's PaLM and Gemini model serving at scale"
+        - "Meta's LLaMA model distribution and fine-tuning ecosystem"
+        - "Microsoft's Azure OpenAI service architecture"
+        - "Hugging Face's transformers and inference endpoints"
+
+    - name: "ML Governance and Compliance"
+      content: |
+        ML governance encompasses the policies, processes, and technical controls
+        needed to ensure responsible, compliant, and auditable machine learning
+        systems. Critical for enterprise deployments and regulated industries.
+        Includes model lineage tracking, bias detection, explainability, data
+        privacy, and regulatory compliance. Senior MLOps engineers must understand
+        frameworks like EU AI Act, GDPR, and industry-specific regulations.
+      subtopics:
+        - name: "Model Lineage and Versioning"
+          content: |
+            Complete tracking of model development from data sources through
+            training to deployment. Includes data lineage, feature engineering
+            steps, hyperparameter history, and model performance metrics.
+            Enables reproducibility, debugging, and compliance auditing.
+            Technologies include MLflow Model Registry, DVC, Weights & Biases,
+            or custom metadata stores with Apache Atlas or DataHub.
+        - name: "Bias Detection and Fairness"
+          content: |
+            Systematic detection and mitigation of algorithmic bias across
+            protected characteristics like race, gender, age, or geography.
+            Includes fairness metrics (demographic parity, equalized odds),
+            bias testing pipelines, and mitigation strategies. Tools include
+            Fairlearn, AI Fairness 360, or custom fairness monitoring systems.
+            Critical for hiring, lending, and criminal justice applications.
+        - name: "Model Explainability and Interpretability"
+          content: |
+            Techniques and tools to make ML model decisions interpretable to
+            stakeholders and regulators. Includes SHAP values, LIME explanations,
+            attention visualizations, and counterfactual analysis. Must balance
+            model performance with interpretability requirements. Essential for
+            regulated industries like healthcare and finance.
+        - name: "Data Privacy and Security"
+          content: |
+            Implementation of privacy-preserving techniques like differential
+            privacy, federated learning, and homomorphic encryption. Includes
+            data anonymization, access controls, and audit logging. Must comply
+            with regulations like GDPR, CCPA, and HIPAA. Covers secure model
+            serving and protection against model inversion attacks.
+      key_concepts:
+        - "Regulatory compliance frameworks (EU AI Act, GDPR, CCPA)"
+        - "Model risk management and validation"
+        - "Automated bias detection and monitoring"
+        - "Explainable AI (XAI) techniques and trade-offs"
+        - "Privacy-preserving machine learning"
+        - "Model governance workflows and approvals"
+        - "Audit trails and compliance reporting"
+        - "Responsible AI principles and implementation"
+      examples:
+        - "JPMorgan's model risk management for trading algorithms"
+        - "IBM's Watson OpenScale for AI governance"
+        - "Microsoft's Responsible AI dashboard and tooling"
+        - "Google's Model Cards for transparency and documentation"
+        - "Salesforce's Einstein bias detection and mitigation"
+
+    - name: "Real-time ML Systems"
+      content: |
+        Real-time ML systems deliver predictions with strict latency requirements,
+        typically under 100ms and often under 10ms. Critical for applications
+        like fraud detection, ad serving, search ranking, and autonomous vehicles.
+        Requires careful system design balancing accuracy, latency, throughput,
+        and cost. Senior MLOps engineers must understand distributed systems,
+        caching strategies, and performance optimization techniques.
+      subtopics:
+        - name: "Low-latency Model Serving"
+          content: |
+            Optimized model serving infrastructure achieving single-digit millisecond
+            latency. Techniques include model quantization, GPU inference optimization,
+            custom CUDA kernels, and specialized hardware like FPGAs or ASICs.
+            Technologies include NVIDIA Triton, TensorRT, ONNX Runtime, or custom
+            C++ serving frameworks. Critical for high-frequency trading and
+            real-time bidding systems.
+        - name: "Feature Computation and Caching"
+          content: |
+            Real-time feature computation from streaming data with intelligent
+            caching strategies. Includes pre-computation of expensive features,
+            multi-level caching (L1 in-memory, L2 Redis, L3 database), and
+            cache invalidation policies. Must handle millions of feature requests
+            per second with consistent sub-millisecond retrieval times.
+        - name: "Real-time Inference Pipelines"
+          content: |
+            End-to-end pipelines that ingest streaming data, compute features,
+            run model inference, and deliver results within strict SLA requirements.
+            Includes load balancing, circuit breakers, timeout handling, and
+            graceful degradation. Uses technologies like Apache Kafka, Apache
+            Pulsar, or cloud streaming services for data ingestion.
+        - name: "Edge Computing and CDN Integration"
+          content: |
+            Deployment of ML models at edge locations for reduced latency and
+            improved user experience. Includes integration with Content Delivery
+            Networks (CDNs), edge computing platforms, and mobile deployment.
+            Requires model optimization for resource-constrained environments
+            and efficient model updates across distributed edge nodes.
+      key_concepts:
+        - "Latency budgets and SLA requirements"
+        - "Model quantization and pruning for speed"
+        - "Distributed inference and load balancing"
+        - "Caching strategies and cache invalidation"
+        - "Circuit breakers and timeout handling"
+        - "Performance monitoring and optimization"
+        - "Edge deployment and model synchronization"
+        - "Real-time feature stores and computation"
+      examples:
+        - "Google's AdWords real-time bidding (RTB) serving 10M+ QPS"
+        - "Amazon's product recommendation with <50ms latency"
+        - "Meta's feed ranking serving 3B+ users in real-time"
+        - "Netflix's video encoding optimization with real-time ML"
+        - "Uber's ETA prediction with sub-second response times"
 
     - name: "Data Pipeline Architecture"
       content: |
@@ -131,34 +345,52 @@ ml_system_design:
         Modern pipelines handle both batch and streaming data, ensure data quality,
         and provide monitoring and observability. Key considerations include
         scalability, fault tolerance, data lineage, and cost optimization.
+        Must handle petabyte-scale data with exactly-once processing semantics.
       subtopics:
-        - name: "ETL vs ELT"
+        - name: "ETL vs ELT vs Real-time Streaming"
           content: |
-            ETL (Extract, Transform, Load) transforms data before loading into
-            the destination, while ELT (Extract, Load, Transform) loads raw data
-            first and transforms it in the destination system. ELT is becoming
-            more popular with cloud data warehouses that can handle transformation
-            at scale.
-        - name: "Stream Processing"
+            ETL (Extract, Transform, Load) transforms data before loading, while
+            ELT (Extract, Load, Transform) loads raw data first and transforms
+            in the destination. Real-time streaming processes data continuously
+            with sub-second latency. ELT is dominant with cloud data warehouses
+            like Snowflake and BigQuery that can handle transformation at scale.
+            Streaming is critical for real-time ML applications.
+        - name: "Stream Processing Frameworks"
           content: |
-            Stream processing handles continuous data flows with low latency.
-            Technologies include Apache Kafka, Apache Flink, and Apache Storm.
-            Enables real-time analytics, monitoring, and decision-making.
-        - name: "Data Quality"
+            Technologies for processing continuous data streams including Apache
+            Kafka with Kafka Streams, Apache Flink, Apache Storm, Apache Pulsar,
+            and cloud services like Google Dataflow, AWS Kinesis, and Azure Stream
+            Analytics. Must handle backpressure, late-arriving data, windowing,
+            and exactly-once processing semantics.
+        - name: "Data Quality and Validation"
           content: |
-            Data quality encompasses completeness, accuracy, consistency, and
-            timeliness of data. Implemented through validation rules, schema
-            enforcement, anomaly detection, and data profiling.
+            Comprehensive data quality frameworks including schema validation,
+            statistical profiling, anomaly detection, and data lineage tracking.
+            Tools include Great Expectations, Apache Griffin, Deequ, or custom
+            validation frameworks. Critical for preventing model performance
+            degradation due to data quality issues.
+        - name: "Orchestration and Workflow Management"
+          content: |
+            Workflow orchestration using Apache Airflow, Prefect, Dagster, or
+            cloud-native solutions like Google Cloud Composer and AWS Step Functions.
+            Includes dependency management, retry logic, monitoring, and scaling.
+            Modern approaches use Kubernetes-native orchestration with Argo
+            Workflows or Tekton for cloud-native environments.
       key_concepts:
-        - "Data lineage and provenance"
-        - "Schema evolution"
-        - "Backpressure handling"
-        - "Exactly-once processing"
-        - "Data partitioning strategies"
+        - "Data lineage and impact analysis"
+        - "Schema evolution and backward compatibility"
+        - "Backpressure handling and flow control"
+        - "Exactly-once vs at-least-once processing semantics"
+        - "Data partitioning and sharding strategies"
+        - "Change data capture (CDC) and event sourcing"
+        - "Data lake vs data warehouse architectures"
+        - "Lambda vs Kappa architecture patterns"
       examples:
-        - "Spotify's event delivery system"
-        - "Airbnb's data pipeline infrastructure"
-        - "Netflix's data pipeline for content recommendations"
+        - "Spotify's event delivery processing 100B+ events daily"
+        - "Airbnb's data pipeline handling 1PB+ data with Airflow"
+        - "Netflix's streaming data pipeline for viewing analytics"
+        - "LinkedIn's Kafka infrastructure processing 7T+ messages daily"
+        - "Uber's real-time data platform with Apache Flink"
 
     - name: "Distributed Training"
       content: |
@@ -166,74 +398,271 @@ ml_system_design:
         multiple machines or GPUs to handle large datasets and complex models.
         Key approaches include data parallelism, model parallelism, and pipeline
         parallelism. Challenges include communication overhead, fault tolerance,
-        and load balancing across workers.
+        and load balancing across workers. Critical for training models with
+        billions of parameters and datasets with trillions of tokens.
       subtopics:
         - name: "Data Parallelism"
           content: |
             Data parallelism distributes training data across multiple workers,
             each maintaining a copy of the full model. Workers compute gradients
             independently and synchronize through parameter servers or all-reduce
-            operations. Most common approach for distributed training.
+            operations. Most common approach for distributed training. Modern
+            implementations use NCCL for GPU communication and Horovod or
+            PyTorch DistributedDataParallel for framework integration.
         - name: "Model Parallelism"
           content: |
             Model parallelism splits the model itself across multiple devices
             when the model is too large to fit on a single device. Different
             parts of the model are computed on different devices, requiring
-            careful coordination of forward and backward passes.
-        - name: "Parameter Server"
+            careful coordination of forward and backward passes. Essential for
+            training large language models and computer vision models with
+            billions of parameters.
+        - name: "Pipeline Parallelism"
           content: |
-            Parameter server architecture uses dedicated servers to store and
-            update model parameters while worker nodes compute gradients.
-            Provides centralized parameter management but can become a bottleneck
-            for communication-intensive workloads.
+            Pipeline parallelism divides the model into stages and processes
+            different mini-batches through different stages simultaneously.
+            Reduces memory requirements and can improve training throughput
+            for very large models. Frameworks include GPipe, PipeDream, and
+            FairScale's pipeline parallel implementation.
+        - name: "Gradient Compression and Communication"
+          content: |
+            Techniques to reduce communication overhead in distributed training
+            including gradient compression, local SGD, and asynchronous updates.
+            Critical for training across geographically distributed clusters
+            or with limited network bandwidth. Includes error feedback mechanisms
+            and convergence guarantees for compressed gradients.
       key_concepts:
-        - "Gradient synchronization strategies"
+        - "Gradient synchronization strategies (synchronous vs asynchronous)"
         - "Communication vs computation trade-offs"
-        - "Fault tolerance and recovery"
-        - "Dynamic scaling of workers"
-        - "Gradient compression techniques"
+        - "Fault tolerance and checkpoint/restart mechanisms"
+        - "Dynamic scaling and elastic training"
+        - "Gradient compression and sparsification"
+        - "Mixed precision training and automatic scaling"
+        - "Memory optimization and gradient accumulation"
+        - "Multi-node networking and topology awareness"
       examples:
-        - "Google's TensorFlow distributed training"
-        - "Facebook's PyTorch distributed training"
-        - "Horovod for distributed deep learning"
+        - "Google's TPU Pod training for PaLM and Gemini models"
+        - "Meta's PyTorch FSDP for LLaMA training"
+        - "Microsoft's DeepSpeed for large model training"
+        - "NVIDIA's Megatron-LM for transformer training"
+        - "OpenAI's distributed training infrastructure for GPT models"
+        - "Hugging Face's accelerate library for multi-GPU training"
 
-    - name: "Model Monitoring"
+    - name: "Model Monitoring and Observability"
       content: |
         Model monitoring involves tracking model performance, data quality,
         and system health in production. It helps detect model drift, data
         drift, and performance degradation. Key metrics include accuracy,
-        latency, throughput, error rates, and business metrics. Monitoring
-        enables proactive model maintenance and retraining decisions.
+        latency, throughput, error rates, and business metrics. Modern monitoring
+        includes automated alerting, root cause analysis, and integration with
+        incident response systems. Critical for maintaining SLAs and preventing
+        business impact from model failures.
       subtopics:
         - name: "Data Drift Detection"
           content: |
-            Data drift occurs when the statistical properties of input data
-            change over time. Detection methods include statistical tests,
-            distribution comparisons, and machine learning-based approaches.
-            Common causes include seasonality, user behavior changes, and
-            external factors.
-        - name: "Model Drift Detection"
+            Data drift occurs when statistical properties of input data change
+            over time. Detection methods include statistical tests (KS test,
+            chi-square), distribution comparisons (KL divergence, Wasserstein
+            distance), and ML-based approaches. Modern solutions use learned
+            drift detectors and domain adaptation techniques. Tools include
+            Evidently AI, Alibi Detect, and cloud-native monitoring services.
+        - name: "Model Performance Monitoring"
           content: |
-            Model drift refers to degradation in model performance over time
-            due to changes in the underlying data patterns. Monitored through
-            accuracy metrics, prediction confidence, and business KPIs.
-            Triggers retraining or model updates.
-        - name: "Performance Monitoring"
+            Continuous monitoring of model accuracy, precision, recall, and
+            business-specific metrics. Includes performance tracking across
+            different segments, time periods, and model versions. Must handle
+            delayed ground truth labels and proxy metrics for real-time monitoring.
+            Integrates with A/B testing frameworks for model comparison.
+        - name: "System Performance and Infrastructure"
           content: |
-            Performance monitoring tracks system-level metrics like latency,
-            throughput, error rates, and resource utilization. Essential for
-            maintaining SLA requirements and optimizing infrastructure costs.
+            Monitoring system-level metrics including latency (p50, p95, p99),
+            throughput (QPS, RPS), error rates, resource utilization (CPU, GPU,
+            memory), and cost metrics. Includes distributed tracing, log
+            aggregation, and real-time dashboards. Tools include Prometheus,
+            Grafana, Datadog, or cloud-native monitoring solutions.
+        - name: "Automated Alerting and Incident Response"
+          content: |
+            Intelligent alerting systems that detect anomalies and trigger
+            appropriate responses. Includes multi-level alerting (warning,
+            critical, emergency), escalation policies, and integration with
+            incident management systems. Modern approaches use ML-based anomaly
+            detection to reduce false positives and improve alert quality.
       key_concepts:
-        - "Statistical significance testing"
-        - "Alerting and notification systems"
-        - "Baseline establishment"
-        - "Continuous evaluation pipelines"
+        - "Statistical significance testing for drift detection"
+        - "Multi-level alerting and escalation policies"
+        - "Baseline establishment and adaptive thresholds"
+        - "Continuous evaluation and feedback loops"
         - "Model performance degradation patterns"
+        - "Observability vs monitoring distinctions"
+        - "SLI/SLO/SLA definitions and tracking"
+        - "Incident response and post-mortem processes"
       examples:
-        - "WhyLabs for ML monitoring"
-        - "Evidently AI for drift detection"
-        - "Amazon SageMaker Model Monitor"
-        - "Custom monitoring dashboards"
+        - "WhyLabs open-source monitoring platform (2025)"
+        - "Evidently AI for comprehensive drift detection"
+        - "Amazon SageMaker Model Monitor with automated retraining"
+        - "Arize AI for purpose-built ML monitoring"
+        - "Neptune.ai for experiment tracking and monitoring"
+        - "Weights & Biases for model performance tracking"
+
+    - name: "MLOps Platform Design"
+      content: |
+        MLOps platform design involves creating comprehensive platforms that
+        support the entire ML lifecycle from experimentation to production.
+        Includes experiment management, model training, deployment, monitoring,
+        and governance. Modern platforms are cloud-native, use microservices
+        architecture, and support multi-tenancy. Must scale to support hundreds
+        of data scientists and thousands of models in production.
+      subtopics:
+        - name: "Platform Architecture and Components"
+          content: |
+            Microservices-based architecture with components for data management,
+            experiment tracking, model training, deployment, and monitoring.
+            Uses container orchestration (Kubernetes), service mesh (Istio),
+            and API gateways. Includes user management, resource quotas, and
+            multi-tenancy support. Modern platforms support both batch and
+            real-time workloads with auto-scaling capabilities.
+        - name: "Developer Experience and Self-Service"
+          content: |
+            User-friendly interfaces including web UIs, APIs, and CLI tools
+            that enable data scientists to work independently. Includes notebook
+            environments (JupyterHub, VS Code), automated CI/CD pipelines, and
+            one-click deployment capabilities. Focus on reducing time-to-production
+            from months to days or hours.
+        - name: "Resource Management and Cost Optimization"
+          content: |
+            Intelligent resource allocation across CPU, GPU, and specialized
+            hardware (TPUs, Inferentia). Includes auto-scaling based on workload
+            patterns, spot instance utilization, and cost tracking per team/project.
+            Modern platforms use Kubernetes resource management with custom
+            schedulers for ML workloads.
+        - name: "Multi-cloud and Hybrid Deployment"
+          content: |
+            Platform capabilities for deployment across multiple cloud providers
+            and on-premises infrastructure. Includes workload portability, data
+            synchronization, and unified management interfaces. Critical for
+            enterprise customers with existing infrastructure investments and
+            regulatory requirements for data locality.
+      key_concepts:
+        - "Microservices architecture for MLOps platforms"
+        - "Container orchestration and Kubernetes operators"
+        - "Multi-tenancy and resource isolation"
+        - "Self-service capabilities and developer productivity"
+        - "Platform as a Product (PaaP) principles"
+        - "API-first design and extensibility"
+        - "Cost attribution and resource optimization"
+        - "Platform reliability and disaster recovery"
+      examples:
+        - "Netflix's Metaflow reducing development time from 4 months to 1 week"
+        - "Uber's Michelangelo supporting 500+ ML use cases"
+        - "Airbnb's Bighead ML platform for experimentation and deployment"
+        - "LinkedIn's ML platform supporting 1000+ models in production"
+        - "Spotify's ML platform for music recommendation and audio analysis"
+
+    - name: "CI/CD for Machine Learning"
+      content: |
+        CI/CD for ML extends traditional software practices to handle the unique
+        challenges of machine learning systems including data validation, model
+        testing, and deployment strategies. Includes automated testing of data
+        pipelines, model validation, and progressive deployment patterns.
+        Critical for maintaining model quality and reducing deployment risks
+        in production ML systems.
+      subtopics:
+        - name: "ML Pipeline Testing"
+          content: |
+            Comprehensive testing strategies for ML pipelines including unit
+            tests for data processing, integration tests for end-to-end pipelines,
+            and performance tests for scalability. Includes data validation,
+            schema testing, and model behavior testing. Modern approaches use
+            property-based testing and mutation testing for robustness.
+        - name: "Model Validation and Testing"
+          content: |
+            Automated validation of model performance, bias detection, and
+            behavioral testing. Includes A/B testing frameworks, shadow deployment,
+            and performance regression testing. Must validate models across
+            different data segments and edge cases. Tools include MLflow,
+            TensorFlow Extended (TFX), and custom validation frameworks.
+        - name: "Deployment Strategies"
+          content: |
+            Progressive deployment patterns including blue-green deployment,
+            canary releases, and shadow deployment for ML models. Includes
+            traffic splitting, rollback mechanisms, and automated monitoring
+            for deployment health. Modern approaches use service mesh and
+            feature flags for fine-grained control.
+        - name: "GitOps for ML"
+          content: |
+            Infrastructure as code and GitOps principles applied to ML systems.
+            Includes version control for data, models, and infrastructure,
+            declarative configuration management, and automated deployment
+            pipelines. Uses tools like ArgoCD, Flux, or custom GitOps operators
+            for Kubernetes-based ML platforms.
+      key_concepts:
+        - "ML-specific testing strategies and frameworks"
+        - "Continuous training and automated retraining"
+        - "Model versioning and artifact management"
+        - "Progressive deployment and traffic management"
+        - "Rollback strategies and incident response"
+        - "Infrastructure as code for ML systems"
+        - "Security scanning and vulnerability management"
+        - "Compliance and audit trail automation"
+      examples:
+        - "Google's TFX for production ML pipelines"
+        - "Meta's FBLearner Flow for ML experimentation and deployment"
+        - "Spotify's ML deployment platform with automated testing"
+        - "Netflix's ML platform with continuous deployment"
+        - "Airbnb's ML infrastructure with GitOps practices"
+
+    - name: "Cost Optimization and Resource Management"
+      content: |
+        Cost optimization for ML systems involves managing compute, storage,
+        and data transfer costs while maintaining performance and reliability.
+        Includes resource right-sizing, auto-scaling, spot instance utilization,
+        and model optimization techniques. Critical for enterprise deployments
+        where ML infrastructure costs can exceed millions of dollars annually.
+        Modern approaches use FinOps practices and cloud cost management tools.
+      subtopics:
+        - name: "Compute Cost Optimization"
+          content: |
+            Strategies for optimizing compute costs including spot instance
+            utilization, auto-scaling based on demand patterns, and workload
+            scheduling optimization. Includes GPU cost management, multi-cloud
+            resource arbitrage, and reserved capacity planning. Modern approaches
+            use predictive scaling and intelligent workload placement.
+        - name: "Model Optimization for Efficiency"
+          content: |
+            Model compression techniques including quantization, pruning,
+            knowledge distillation, and neural architecture search for efficient
+            models. Reduces inference costs while maintaining accuracy. Includes
+            hardware-specific optimizations for CPUs, GPUs, and specialized
+            accelerators like TPUs and Inferentia chips.
+        - name: "Storage and Data Transfer Optimization"
+          content: |
+            Optimizing storage costs through data lifecycle management, compression,
+            and intelligent tiering. Includes data transfer cost optimization
+            across regions and cloud providers. Modern approaches use data
+            deduplication, delta lake formats, and edge caching strategies
+            to reduce bandwidth and storage costs.
+        - name: "Resource Allocation and Scheduling"
+          content: |
+            Intelligent resource allocation using bin-packing algorithms,
+            priority-based scheduling, and multi-tenant resource sharing.
+            Includes workload prediction, resource forecasting, and dynamic
+            allocation based on business priorities. Modern platforms use
+            Kubernetes resource management with custom schedulers for ML workloads.
+      key_concepts:
+        - "FinOps practices for ML infrastructure"
+        - "Total Cost of Ownership (TCO) analysis"
+        - "Resource utilization optimization"
+        - "Cost attribution and chargeback models"
+        - "Performance vs cost trade-off analysis"
+        - "Auto-scaling strategies and cost implications"
+        - "Multi-cloud cost optimization"
+        - "Sustainability and carbon footprint optimization"
+      examples:
+        - "Netflix's cost optimization reducing inference costs by 40%"
+        - "Uber's resource management platform optimizing GPU utilization"
+        - "Airbnb's cost optimization achieving 60% reduction in ML infrastructure costs"
+        - "Spotify's intelligent scaling reducing compute costs by 50%"
+        - "Meta's efficiency optimization for large-scale ML training"
 
     - name: "ML Infrastructure Scaling"
       content: |
@@ -242,37 +671,212 @@ ml_system_design:
         considerations include horizontal vs vertical scaling, auto-scaling
         strategies, resource optimization, and cost management. Modern
         approaches leverage containerization, orchestration, and cloud-native
-        technologies.
+        technologies. Must support scaling from prototype to production
+        serving millions of users with sub-second latency requirements.
       subtopics:
-        - name: "Horizontal Scaling"
+        - name: "Horizontal Scaling Patterns"
           content: |
             Horizontal scaling adds more machines to handle increased load.
             For ML workloads, this includes distributing training across
             multiple nodes, serving models from multiple replicas, and
-            partitioning data processing. Requires careful load balancing
-            and state management.
-        - name: "Auto-scaling"
+            partitioning data processing. Requires careful load balancing,
+            state management, and consistent hashing for data distribution.
+            Modern implementations use Kubernetes HPA and custom autoscalers.
+        - name: "Auto-scaling and Elasticity"
           content: |
             Auto-scaling automatically adjusts resource allocation based on
-            demand. For ML systems, this includes scaling model serving
-            replicas based on request volume, scaling training clusters
-            based on job queue length, and scaling data processing based
-            on data volume.
-        - name: "Resource Optimization"
+            demand patterns, queue lengths, and performance metrics. For ML
+            systems, includes scaling model serving replicas, training clusters,
+            and data processing jobs. Modern approaches use predictive scaling,
+            custom metrics, and event-driven autoscaling with KEDA.
+        - name: "Resource Optimization and Efficiency"
           content: |
             Resource optimization involves efficient utilization of compute,
-            memory, and storage resources. Techniques include model
-            quantization, pruning, knowledge distillation, and mixed-precision
-            training. Also includes scheduling optimization and resource
-            sharing strategies.
+            memory, and storage resources. Techniques include model compression,
+            mixed precision training, gradient checkpointing, and intelligent
+            batching. Modern approaches use bin-packing algorithms, resource
+            quotas, and priority-based scheduling for multi-tenant environments.
+        - name: "Global Distribution and Edge Computing"
+          content: |
+            Scaling ML systems globally with edge computing, CDN integration,
+            and multi-region deployment. Includes model synchronization across
+            regions, data locality optimization, and latency-based routing.
+            Critical for serving global user bases with consistent performance
+            and regulatory compliance for data sovereignty.
       key_concepts:
-        - "Load balancing strategies"
-        - "Container orchestration"
-        - "Resource quotas and limits"
-        - "Cost optimization techniques"
-        - "Performance vs cost trade-offs"
+        - "Load balancing strategies for ML workloads"
+        - "Container orchestration and Kubernetes scaling"
+        - "Resource quotas, limits, and quality of service"
+        - "Cost optimization techniques and trade-offs"
+        - "Performance vs cost vs latency optimization"
+        - "Multi-tenant resource sharing and isolation"
+        - "Capacity planning and demand forecasting"
+        - "Disaster recovery and business continuity"
       examples:
-        - "Kubernetes for ML workload orchestration"
-        - "Ray for distributed ML computing"
-        - "Kubeflow for ML pipeline scaling"
-        - "AWS Batch for large-scale training"
+        - "Kubernetes with Kubeflow for ML pipeline orchestration"
+        - "Ray for distributed ML computing and hyperparameter tuning"
+        - "Apache Airflow for workflow orchestration at scale"
+        - "AWS Batch for large-scale training job management"
+        - "Google Cloud AI Platform for managed ML infrastructure"
+        - "Azure ML for enterprise ML lifecycle management"
+
+    - name: "Security and Privacy in ML Systems"
+      content: |
+        Security and privacy for ML systems encompasses protecting models,
+        data, and infrastructure from various attacks and ensuring compliance
+        with privacy regulations. Includes adversarial attacks, model extraction,
+        data poisoning, and privacy-preserving techniques. Critical for
+        enterprise deployments and regulated industries where data breaches
+        can result in significant financial and reputational damage.
+      subtopics:
+        - name: "Adversarial Security and Robustness"
+          content: |
+            Protection against adversarial attacks including evasion attacks,
+            poisoning attacks, and model inversion. Includes adversarial training,
+            input validation, and robust model architectures. Modern approaches
+            use certified defenses, randomized smoothing, and ensemble methods
+            for improved robustness against sophisticated attacks.
+        - name: "Privacy-Preserving Machine Learning"
+          content: |
+            Techniques for training and serving ML models while preserving
+            privacy including differential privacy, federated learning, homomorphic
+            encryption, and secure multi-party computation. Critical for healthcare,
+            financial services, and cross-organizational collaborations where
+            data cannot be directly shared.
+        - name: "Model and Infrastructure Security"
+          content: |
+            Security practices for ML infrastructure including secure model
+            serving, access controls, audit logging, and vulnerability management.
+            Includes container security, API security, and secrets management.
+            Modern approaches use zero-trust architecture, service mesh security,
+            and automated security scanning in CI/CD pipelines.
+        - name: "Compliance and Regulatory Requirements"
+          content: |
+            Meeting regulatory requirements including GDPR, HIPAA, PCI-DSS,
+            and emerging AI regulations like the EU AI Act. Includes data
+            governance, audit trails, right to explanation, and automated
+            compliance reporting. Critical for enterprise deployments in
+            regulated industries.
+      key_concepts:
+        - "Threat modeling for ML systems"
+        - "Adversarial attack mitigation strategies"
+        - "Privacy-preserving computation techniques"
+        - "Zero-trust architecture for ML infrastructure"
+        - "Automated security scanning and vulnerability assessment"
+        - "Incident response and forensics for ML systems"
+        - "Regulatory compliance automation"
+        - "Secure model deployment and serving"
+      examples:
+        - "Apple's differential privacy for iOS telemetry"
+        - "Google's federated learning for mobile keyboards"
+        - "Microsoft's confidential computing for sensitive ML workloads"
+        - "IBM's homomorphic encryption for privacy-preserving analytics"
+        - "Meta's secure aggregation for federated learning"
+
+    - name: "Edge ML and Federated Learning"
+      content: |
+        Edge ML brings machine learning capabilities closer to data sources
+        and users for reduced latency, improved privacy, and bandwidth efficiency.
+        Federated learning enables training models across distributed devices
+        without centralizing data. Critical for mobile applications, IoT devices,
+        autonomous vehicles, and privacy-sensitive applications where data
+        cannot leave the device or organization.
+      subtopics:
+        - name: "Model Optimization for Edge Deployment"
+          content: |
+            Techniques for deploying models on resource-constrained devices
+            including quantization, pruning, knowledge distillation, and neural
+            architecture search. Frameworks include TensorFlow Lite, ONNX Runtime,
+            Apache TVM, and hardware-specific optimizations for ARM processors,
+            mobile GPUs, and specialized edge accelerators.
+        - name: "Federated Learning Infrastructure"
+          content: |
+            Infrastructure for coordinating federated learning across distributed
+            clients including secure aggregation, client selection, and communication
+            protocols. Handles device heterogeneity, partial participation,
+            and Byzantine failures. Frameworks include Flower, FATE, PySyft,
+            and cloud-native federated learning platforms.
+        - name: "Edge Computing Platforms"
+          content: |
+            Deployment platforms for edge ML including AWS IoT Greengrass,
+            Azure IoT Edge, Google Cloud IoT Edge, NVIDIA Jetson, and Intel
+            OpenVINO. Includes device management, model synchronization, and
+            offline operation capabilities. Modern platforms support over-the-air
+            updates and edge-to-cloud data synchronization.
+        - name: "Privacy and Security for Edge ML"
+          content: |
+            Security considerations for edge deployment including secure model
+            updates, device authentication, and protection against model extraction.
+            Includes differential privacy for federated learning, secure
+            aggregation protocols, and homomorphic encryption for private
+            inference on edge devices.
+      key_concepts:
+        - "Model compression and quantization techniques"
+        - "Federated learning algorithms and aggregation methods"
+        - "Edge-cloud hybrid architectures"
+        - "Device heterogeneity and resource constraints"
+        - "Privacy-preserving aggregation protocols"
+        - "Over-the-air model updates and versioning"
+        - "Offline operation and local inference"
+        - "Edge security and device management"
+      examples:
+        - "Google's Gboard federated learning for keyboard predictions"
+        - "Apple's Siri on-device speech recognition and processing"
+        - "Tesla's edge ML for autonomous driving perception"
+        - "AWS IoT Greengrass for industrial edge ML applications"
+        - "NVIDIA Jetson for robotics and computer vision at the edge"
+
+    - name: "Experiment Management and A/B Testing"
+      content: |
+        Experiment management for ML involves systematic experimentation,
+        A/B testing frameworks, and statistical analysis for model validation.
+        Includes experimental design, statistical significance testing, and
+        integration with deployment systems. Critical for data-driven decision
+        making and continuous model improvement. Modern platforms support
+        multi-armed bandits, Bayesian optimization, and causal inference.
+      subtopics:
+        - name: "Experimental Design and Statistical Methods"
+          content: |
+            Rigorous experimental design including randomization, stratification,
+            and power analysis. Statistical methods for A/B testing including
+            t-tests, chi-square tests, and Bayesian approaches. Includes multiple
+            testing correction, sequential testing, and early stopping criteria.
+            Modern approaches use causal inference and quasi-experimental methods
+            for complex business scenarios.
+        - name: "A/B Testing Infrastructure"
+          content: |
+            Technical infrastructure for running A/B tests including traffic
+            splitting, feature flags, and result collection. Includes integration
+            with model serving systems, real-time metrics collection, and
+            automated statistical analysis. Modern platforms support multi-variate
+            testing, personalized experiments, and contextual bandits.
+        - name: "Experiment Tracking and Management"
+          content: |
+            Comprehensive tracking of experiments including hyperparameters,
+            metrics, artifacts, and results. Platforms include MLflow, Weights &
+            Biases, Neptune.ai, and Kubeflow. Includes experiment reproducibility,
+            collaboration features, and integration with version control systems.
+            Modern approaches support distributed experiments and automated
+            hyperparameter optimization.
+        - name: "Business Metrics and KPI Integration"
+          content: |
+            Integration of ML experiments with business metrics and KPIs including
+            revenue impact, user engagement, and operational efficiency. Includes
+            long-term impact measurement, customer lifetime value analysis,
+            and multi-objective optimization. Critical for demonstrating business
+            value and prioritizing ML investments.
+      key_concepts:
+        - "Experimental design and statistical power analysis"
+        - "Multiple testing correction and false discovery rate"
+        - "Bayesian A/B testing and posterior probability"
+        - "Multi-armed bandits and exploration-exploitation"
+        - "Causal inference and treatment effect estimation"
+        - "Experiment reproducibility and version control"
+        - "Business metrics integration and ROI measurement"
+        - "Automated experiment analysis and reporting"
+      examples:
+        - "Netflix's A/B testing platform for recommendation algorithms"
+        - "Airbnb's experiment platform for pricing and search ranking"
+        - "Spotify's experimentation framework for music recommendations"
+        - "Uber's experimentation platform for driver-rider matching"
+        - "Meta's experiment infrastructure for feed ranking and ads"
