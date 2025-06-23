@@ -1,38 +1,54 @@
-# Enhanced prompts/basic_card.yaml  
 system_prompt: |
-  You are an expert in creating optimal Q&A flashcards for spaced repetition.
-  Follow the evidence that active recall outperforms passive review by 50%.
+  You are an expert in creating spaced repetition flashcards for RemNote.
+  Generate ONLY the flashcard content in the exact format requested.
+  Do not include explanations, commentary, or quality assessments.
   
-  Create questions that:
-  - Test practical understanding, not just memorization
-  - Have specific, unambiguous answers
-  - Require effortful retrieval from memory
-  - Build towards higher-order thinking
+  Rules for effective flashcards:
+  - Test one specific concept per card
+  - Use clear, unambiguous questions
+  - Provide complete but concise answers (1-2 sentences)
+  - Target 90% accuracy for someone who studied the material
+  - Require genuine memory retrieval
 
 user_prompt: |
-  Create {num_cards} basic Q&A flashcards for spaced repetition:
-
+  Create {num_cards} basic Q&A flashcards for this content:
   **Topic:** {topic_name}
-  **Context:** {parent_context}
   **Content:** {content}
-  **Target Level:** {difficulty_level}
 
-  **Progressive Question Types:**
-  - Level 1: "What is..." "Define..." "List the main..."
-  - Level 2: "How does..." "When would you..." "What happens if..."
-  - Level 3: "Why does..." "Compare..." "What's the relationship..."
-  - Level 4: "Evaluate..." "Predict..." "Design a solution..."
+  **Output Format:** Use EXACTLY this format with no additional text:
+  QUESTION >> ANSWER
 
-  **Answer Requirements:**
-  - Specific and complete (avoid vague answers)
-  - 1-2 sentences maximum
-  - Include context when needed for clarity
-  - Test understanding, not just recall
+  **Question Types by Level:**
+  - Foundation: "What is..." "Define..." "List the main..."
+  - Application: "How does..." "When would you..." "What happens if..."
+  - Analysis: "Why does..." "Compare..." "What's the relationship..."
+  - Synthesis: "Evaluate..." "Design..." "Predict..."
 
-  Generate in format: QUESTION >> ANSWER
+  **Requirements:**
+  - One line per flashcard
+  - Use the >> separator exactly as shown
+  - Questions should be specific and test one concept
+  - Answers should be concise but complete (1-2 sentences)
+  - No explanations or commentary
+
+  **Examples:**
+  What is Round Robin load balancing? >> A load balancing algorithm that distributes incoming requests sequentially across available servers in a circular pattern.
+  
+  How does Round Robin ensure equal distribution? >> It cycles through each server in order, assigning the next request to the next server in the rotation regardless of current load.
+  
+  What is the main limitation of Round Robin? >> It assumes all servers have equal capacity and doesn't consider actual server load or performance differences.
+
+  Generate exactly {num_cards} flashcards:
+  - No explanations or commentary
+  - No "FRONT:" or "BACK:" labels
+  - Use >> separator only
+  - Answer in 1-2 complete sentences
+
+  Generate exactly {num_cards} flashcards:
 
 config:
   temperature: 0.3
-  max_tokens: 400
-  target_accuracy: 0.9
+  max_tokens: 300
   expected_format: "QUESTION >> ANSWER"
+  separator: ">>"
+  max_cards: 3

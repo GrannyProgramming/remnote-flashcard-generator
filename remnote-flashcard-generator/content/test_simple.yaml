@@ -1,0 +1,47 @@
+# Simple Test Content for API Call Validation
+# Single topic with clear examples for multiple choice card generation
+
+ml_system_design:
+  metadata:
+    subject: "ML System Design"
+    author: "Test Suite"
+    version: "1.0"
+    difficulty: "beginner"
+    
+  topics:
+    - name: "Load Balancing"
+      content: |
+        Distributing incoming network traffic across multiple servers to ensure no single server becomes overwhelmed.
+        
+        Examples:
+        - Round Robin: Requests distributed sequentially to each server (Server1 → Server2 → Server3 → Server1)
+        - Least Connections: Route to server with fewest active connections
+        - Weighted Round Robin: Servers get requests based on capacity (2x capacity = 2x requests)
+        - IP Hash: Route based on client IP hash to ensure session stickiness
+        
+        Context: Critical component for high availability and scalability in distributed systems
+      difficulty: "beginner"
+      
+      subtopics:
+        - name: "Round Robin"
+          content: |
+            Load balancing algorithm that distributes requests sequentially to available servers.
+            
+            Examples:
+            - 3 servers: Request 1→Server A, Request 2→Server B, Request 3→Server C, Request 4→Server A
+            - Equal distribution assuming equal server capacity
+            
+            Context: Simplest load balancing method
+          difficulty: "beginner"
+          
+        - name: "Health Checks"
+          content: |
+            Monitoring mechanism to verify server availability before routing traffic.
+            
+            Examples:
+            - HTTP health endpoint: GET /health returns 200 OK
+            - TCP connection test: Attempt socket connection on service port
+            - Application-level check: Database connectivity validation
+            
+            Context: Prevents routing to failed servers
+          difficulty: "beginner"

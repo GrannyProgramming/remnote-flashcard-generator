@@ -1,40 +1,38 @@
-# Enhanced Descriptor Card Generation Prompt Template
-# Used for creating meaningful Attribute ;; Value style flashcards
-
+descriptor_cards:
 system_prompt: |
-  You are an expert in creating spaced repetition flashcards for ML system design.
-  Create descriptor cards that define specific attributes of concepts with clear, testable relationships.
-  Focus on practical attributes that help distinguish and understand concepts.
-
+  You are an expert in creating descriptor flashcards for ML system design.
+  Generate ONLY the flashcard content in the exact format requested.
+  Do not include explanations, commentary, or quality assessments.
 user_prompt: |
-  Create 2-3 descriptor flashcards that ask about specific attributes of this ML system design concept{context_info}:
-
-  **Parent Concept:** {topic_name}
+  Create {num_cards} descriptor flashcards for this ML system design concept{context_info}:  **Parent Concept:** {topic_name}
   **Content:** {content}
-  **Key Concepts:** {key_concepts}
 
-  Rules:
-  1. Create question-answer pairs about specific attributes of {topic_name}
-  2. Format: What [attribute] does [concept/component] [serve/provide/solve] for {topic_name}? ;; [concise answer]
-  3. Focus on meaningful relationships between components and the parent concept
-  4. Questions should test understanding of WHY components exist in the system
-  5. Answers should be concise but complete (1-2 sentences max)
-  
-  Good descriptor question patterns:
+  **Output Format:** Use EXACTLY this format with no additional text:
+  What [attribute] does [concept/component] [serve/provide/solve] for {topic_name}? ;; [concise answer]
+
+  **Requirements:**
+  - Focus on meaningful relationships between components and the parent concept
+  - Questions should test understanding of WHY components exist in the system
+  - Answers should be concise but complete (1-2 sentences max)
+  - Use the ;; separator exactly as shown
+  - No explanations or commentary
+
+  **Good descriptor question patterns:**
   - What problem does [component] solve for {topic_name}?
   - What purpose does [feature] serve in {topic_name}?
   - What advantage does [characteristic] provide to {topic_name}?
   - What limitation does [aspect] create for {topic_name}?
   - What role does [element] play in {topic_name}?
 
-  Examples of good descriptor cards:
-  - What problem does immutable data storage solve for Lambda Architecture? ;; Prevents data corruption and enables reliable reprocessing of historical data
-  - What purpose does the speed layer serve in Lambda Architecture? ;; Provides low-latency processing for real-time analytics while batch layer catches up
-  - What advantage does horizontal scaling provide to microservices? ;; Allows independent scaling of individual services based on demand
+  **Examples:**
+  What problem does Round Robin solve for Load Balancing? ;; It provides a simple way to distribute requests equally across servers without complex calculations.
+  
+  What advantage does Health Checking provide to Load Balancing? ;; It prevents traffic from being routed to failed servers, ensuring system reliability.
+  
+  What limitation does sequential distribution create for Round Robin? ;; It doesn't consider actual server load or capacity differences when distributing requests.
 
-  Generate 2-3 descriptor cards for {topic_name}:
+  Generate exactly {num_cards} descriptor cards:
 
-# Configuration for this prompt type
 config:
   temperature: 0.3
   max_tokens: 300

@@ -2,32 +2,43 @@
 # For concepts with concrete examples or clear alternatives
 
 system_prompt: |
-  You are an expert educational content creator specializing in spaced repetition flashcards.
-  Create multiple choice flashcards that test conceptual understanding through examples.
-  
-  Multiple choice cards use >> with lettered options:
-  - Perfect for testing examples, applications, or distinctions
-  - One correct answer with plausible distractors
-  - Helps reinforce concept boundaries
-
+  You are an expert in creating multiple choice flashcards for conceptual understanding.
+  Generate ONLY the flashcard content in the exact format requested.
+  Do not include explanations, commentary, or quality assessments.
 user_prompt: |
-  Create a multiple choice flashcard for the following ML system design concept{context_info}:
-  
+  Create a multiple choice flashcard for this ML system design concept{context_info}:
   **Topic:** {topic_name}
   **Examples:** {examples}
-  
-  Generate a multiple choice flashcard that:
-  1. Tests understanding through examples or applications
-  2. Has one clearly correct answer
-  3. Includes 3-4 plausible but incorrect options
-  4. Uses lettered format (A), B), C), D))
-  
-  Format as: "Question >> \nA) Option 1\nB) Option 2\nC) Option 3\nD) Option 4"
-  
-  Return only the flashcard content, no additional text.
+
+  **Output Format:** Use EXACTLY this format with no additional text:
+  Question >> 
+  A) Option 1
+  B) Option 2
+  C) Option 3
+  D) Option 4
+
+  **Requirements:**
+  - Test understanding through examples or applications
+  - Have one clearly correct answer
+  - Include 3-4 plausible but incorrect options
+  - Use lettered format (A), B), C), D))
+  - Use the >> separator exactly as shown
+  - No explanations or commentary
+
+  **Example:**
+  Which of the following best describes Round Robin load balancing? >>
+  A) Distributes requests sequentially to each server in rotation
+  B) Routes requests to the server with lowest CPU usage
+  C) Uses IP hashing to maintain session stickiness
+  D) Prioritizes requests based on content type
+
+  Generate exactly 1 multiple choice flashcard:
 
 # Configuration
-max_cards: 1
-card_type: "multiple_choice"
-priority: "medium"
-min_examples: 3
+config:
+  temperature: 0.4
+  separator: ">>"
+  max_cards: 1
+  card_type: "multiple_choice"
+  priority: "medium"
+  min_examples: 3

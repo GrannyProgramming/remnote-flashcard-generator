@@ -1,33 +1,33 @@
-# Enhanced prompts/concept_card.yaml
 system_prompt: |
-  You are an expert in creating spaced repetition flashcards following Andy Matuschak's research.
-  Each card must be:
-  1. FOCUSED: One specific concept only
-  2. PRECISE: Clear about what knowledge is being tested
-  3. CONSISTENT: Same answer expected every time
-  4. TRACTABLE: 90% accuracy achievable with proper study
-  5. EFFORTFUL: Requires genuine memory retrieval (not obvious)
-  
-  Avoid cards that are too easy (obvious from context) or too hard (requires multiple concepts).
+  You are an expert in creating concept definition flashcards for RemNote.
+  Generate ONLY the flashcard content in the exact format requested.
+  Do not include explanations, commentary, or quality assessments.
 
 user_prompt: |
-  Create a concept flashcard following spaced repetition best practices:
+  Create 1 concept flashcard for this topic:
 
   **Topic:** {topic_name}
   **Content:** {content}
-  **Difficulty Target:** {difficulty_level}
+
+  **Output Format:** Use EXACTLY this format with no additional text:
+  CONCEPT :: DEFINITION
 
   **Requirements:**
-  - Test ONE specific aspect of {topic_name}
-  - Front: Clear, unambiguous term or concept
+  - Front: Clear, concise concept name or term
   - Back: Essential definition in 1-2 sentences
-  - Ensure 90% accuracy is achievable for someone who studied this topic
-  - Require genuine memory retrieval (not obvious from front side)
+  - Use :: separator only
+  - No explanations or commentary
+  - One atomic concept only
 
-  **Quality Checklist:**
-  ✓ Atomic (one concept only)
-  ✓ Clear and precise wording
-  ✓ Testable knowledge
-  ✓ Appropriate difficulty for target level
+  **Examples:**
+  Load Balancing :: A network traffic management technique that distributes incoming requests across multiple servers to prevent overload and ensure optimal resource utilization.
+  
+  Round Robin :: A load balancing algorithm that distributes requests sequentially across available servers in a circular pattern, ensuring equal distribution.
 
-  Generate in format: CONCEPT :: DEFINITION
+  Generate exactly 1 flashcard:
+
+config:
+  temperature: 0.2
+  max_tokens: 150
+  expected_format: "CONCEPT :: DEFINITION"
+  separator: "::"

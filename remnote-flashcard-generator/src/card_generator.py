@@ -174,7 +174,8 @@ class CardGenerator:
                     if self._is_unique_card(card):
                         cards.append(card)
                         self._register_card(card)
-              # Generate descriptor cards for attributes
+            
+            # Generate descriptor cards for attributes
             if self.config.get('card_types', {}).get('descriptor', True):
                 descriptor_cards = self._generate_descriptor_cards(topic, parent_context)
                 for card in descriptor_cards:
@@ -274,20 +275,18 @@ class CardGenerator:
         
         try:
             # Get prompt configuration from YAML
-            prompt_config = self.prompt_loader.get_config("basic")
-            
-            # Format prompt with topic data
+            prompt_config = self.prompt_loader.get_config("basic")            # Format prompt with topic data
             context_info = f" (part of {parent_context})" if parent_context else ""
-            examples_text = f"Examples: {', '.join(topic.examples[:3])}\n" if topic.examples else ""
-            concepts_text = f"Key concepts: {', '.join(topic.key_concepts[:5])}\n" if topic.key_concepts else ""
+            
+            # Get number of cards to generate from config
+            num_cards = prompt_config.get('max_cards', 3)
             
             formatted_prompt = self.prompt_loader.format_prompt(
                 "basic",
                 context_info=context_info,
                 topic_name=topic.name,
                 content=topic.content,
-                examples_text=examples_text,
-                concepts_text=concepts_text
+                num_cards=num_cards
             )
             
             # Generate with LLM
@@ -330,20 +329,18 @@ class CardGenerator:
         
         try:
             # Get prompt configuration from YAML
-            prompt_config = self.prompt_loader.get_config("cloze")
-            
-            # Format prompt with topic data
+            prompt_config = self.prompt_loader.get_config("cloze")            # Format prompt with topic data
             context_info = f" (part of {parent_context})" if parent_context else ""
-            examples_text = f"Examples: {', '.join(topic.examples[:3])}\n" if topic.examples else ""
-            concepts_text = f"Key concepts: {', '.join(topic.key_concepts[:5])}\n" if topic.key_concepts else ""
+            
+            # Get number of cards to generate from config
+            num_cards = prompt_config.get('max_cards', 2)
             
             formatted_prompt = self.prompt_loader.format_prompt(
                 "cloze",
                 context_info=context_info,
                 topic_name=topic.name,
                 content=topic.content[:300] + "..." if len(topic.content) > 300 else topic.content,
-                examples_text=examples_text,
-                concepts_text=concepts_text
+                num_cards=num_cards
             )
             
             # Generate with LLM
@@ -369,7 +366,6 @@ class CardGenerator:
                 )
                 cards.append(card)
                 self.generation_stats["by_type"]["cloze"] += 1
-                
         except Exception as e:
             logger.warning(f"Failed to generate cloze cards for {topic.name}: {e}")
         
@@ -385,81 +381,52 @@ class CardGenerator:
         try:
             # Get prompt configuration from YAML
             prompt_config = self.prompt_loader.get_config("descriptor")
-              # Generate from key concepts with configured format
-            max_descriptors = prompt_config.get('max_cards', 3)
+              # Format prompt with topic data
+            context_info = f" (part of {parent_context})" if parent_context else ""
             
-            for concept in topic.key_concepts[:max_descriptors]:
-                card = Flashcard(
-                    card_type=CardType.DESCRIPTOR,
-                    front=concept,
-                    back=f"Key concept of {topic.name}",
-                    parent=topic.name,
-                    tags=[topic.name, "key_concept"],
-                    difficulty=getattr(topic, 'difficulty', 'intermediate'),
-                    direction=CardDirection.BIDIRECTIONAL  # Use ;; syntax for descriptors
-                )
-                cards.append(card)
-                self.generation_stats["by_type"]["descriptor"] += 1
+            # Get number of cards to generate from config
+            num_cards = prompt_config.get('max_cards', 3)
+            
+            formatted_prompt = self.prompt_loader.format_prompt(
+                "descriptor",
+                context_info=context_info,
+                topic_name=topic.name,
+                content=topic.content[:300] + "..." if len(topic.content) > 300 else topic.content,
+                num_cards=num_cards
+            )
+            
+            # Generate with LLM
+            response = self.llm.generate(
+                formatted_prompt, 
+                temperature=prompt_config.get('temperature', 0.3)
+            )
+            self.generation_stats["llm_calls"] += 1
+            
+            # Parse descriptor cards using configured separator
+            separator = prompt_config.get('separator', ';;')
+            lines = [line.strip() for line in response.split('\n') if separator in line]
+            
+            max_cards = prompt_config.get('max_cards', 3)
+            for line in lines[:max_cards]:
+                if separator in line:
+                    front, back = line.split(separator, 1)
+                    card = Flashcard(
+                        card_type=CardType.DESCRIPTOR,
+                        front=front.strip(),
+                        back=back.strip(),
+                        parent=parent_context,
+                        tags=[topic.name, "descriptor"],
+                        difficulty=getattr(topic, 'difficulty', 'intermediate'),
+                        direction=CardDirection.BIDIRECTIONAL  # Use ;; syntax for descriptors
+                    )
+                    cards.append(card)
+                    self.generation_stats["by_type"]["descriptor"] += 1
                 
         except Exception as e:
             logger.warning(f"Failed to generate descriptor cards for {topic.name}: {e}")
         
         return cards
     
-    def _is_unique_card(self, card: Flashcard) -> bool:
-        """Check if card is unique (not a duplicate)."""
-        if card.source_hash in self.generated_cards:
-            self.generation_stats["duplicates_avoided"] += 1
-            return False
-        return True
-    
-    def _register_card(self, card: Flashcard) -> None:
-        """Register card as generated to avoid duplicates."""
-        self.generated_cards.add(card.source_hash)
-        self.generation_stats["total_cards"] += 1
-      # REMOVED: escape_remnote_syntax method
-    # This functionality is now handled by RemNoteFormatter._escape_special_chars()
-    def validate_card_format(self, card: Flashcard) -> bool:
-        """
-        Validate that a card follows proper RemNote formatting rules.
-        
-        Args:
-            card: Flashcard to validate
-            
-        Returns:
-            True if card format is valid for RemNote import
-        """
-        # Basic content validation
-        if not card.front:
-            return False
-            
-        # For most card types, back content is required
-        if card.card_type != CardType.CLOZE and not card.back and not card.list_items:
-            return False
-            
-        # Validate cloze cards have proper format
-        if card.card_type == CardType.CLOZE:
-            if not ('{{' in card.front and '}}' in card.front):
-                return False
-        
-        # List cards should have list items
-        if card.card_type in [CardType.LIST_ANSWER, CardType.MULTIPLE_CHOICE]:
-            if not card.list_items:
-                return False
-                
-        # Check for unescaped delimiters (only flag if they appear to be unintentional)
-        dangerous_patterns = [':::', '>>>', ';;;']  # Multi-line delimiters in single-line content
-        for pattern in dangerous_patterns:
-            if pattern in card.front or pattern in card.back:
-                # Allow if this is actually a multi-line card
-                if not (card.is_multiline or 'multiline' in card.card_type.value.lower()):
-                    logger.warning(f"Potential delimiter conflict in card: {card.front[:50]}...")
-                    return False
-                
-        return True
-      # REMOVED: format_card_for_remnote method
-    # This functionality is now handled by RemNoteFormatter._format_card()    # REMOVED: generate_hierarchical_output method
-    # This functionality is now handled by RemNoteFormatter.format_cards(hierarchy=True)
     def _generate_multiline_cards(self, topic: Topic, parent_context: Optional[str] = None) -> List[Flashcard]:
         """Generate multi-line cards for complex content."""
         cards = []
@@ -500,38 +467,123 @@ class CardGenerator:
                 )
                 cards.append(card)
                 self.generation_stats["by_type"]["list_answer"] += 1
-        
         except Exception as e:
             logger.warning(f"Failed to generate list answer cards for {topic.name}: {e}")
         
         return cards
     
     def _generate_multiple_choice_cards(self, topic: Topic, parent_context: Optional[str] = None) -> List[Flashcard]:
-        """Generate multiple choice cards when examples are available."""
+        """Generate multiple choice cards using LLM prompts."""
         cards = []
         
         try:
-            # Generate multiple choice from examples
-            if topic.examples and len(topic.examples) >= 3:
-                # Use first example as correct answer, others as distractors
-                choices = topic.examples[:4]  # Limit to 4 choices
+            # Only generate if we have enough examples
+            if not topic.examples or len(topic.examples) < 3:
+                return cards
                 
-                card = Flashcard(
-                    card_type=CardType.MULTIPLE_CHOICE,
-                    front=f"Which is an example of {topic.name}?",
-                    back="",  # Will be formatted from list_items
-                    parent=parent_context,
-                    tags=[topic.name, "multiple_choice"],
-                    list_items=choices,
-                    correct_choice_index=0
-                )
-                cards.append(card)
-                self.generation_stats["by_type"]["multiple_choice"] += 1
+            # Get prompt configuration from YAML
+            prompt_config = self.prompt_loader.get_config("multiple_choice")            # Format prompt with topic data
+            context_info = f" (part of {parent_context})" if parent_context else ""
+            examples_text = '\n'.join(f"- {example}" for example in topic.examples[:4]) if topic.examples else topic.content
+            
+            formatted_prompt = self.prompt_loader.format_prompt(
+                "multiple_choice",
+                context_info=context_info,
+                topic_name=topic.name,
+                examples=examples_text
+            )
+            
+            # Generate with LLM
+            response = self.llm.generate(
+                formatted_prompt, 
+                temperature=prompt_config.get('temperature', 0.4)
+            )
+            self.generation_stats["llm_calls"] += 1
+            
+            # Parse response for multiple choice format
+            lines = response.strip().split('\n')
+            if len(lines) >= 5:  # Question + 4 options minimum
+                question_line = lines[0]
+                if '>>' in question_line:
+                    front, _ = question_line.split('>>', 1)
+                    
+                    # Extract options (A), B), C), D))
+                    options = []
+                    for line in lines[1:]:
+                        line = line.strip()
+                        if line and any(line.startswith(f"{letter})") for letter in ['A', 'B', 'C', 'D']):
+                            # Remove the letter prefix
+                            option = line[2:].strip()
+                            options.append(option)
+                    
+                    if len(options) >= 3:
+                        card = Flashcard(
+                            card_type=CardType.MULTIPLE_CHOICE,
+                            front=front.strip(),
+                            back="",  # Will be formatted from list_items
+                            parent=parent_context,
+                            tags=[topic.name, "multiple_choice"],
+                            list_items=options,
+                            correct_choice_index=0  # Assume first option is correct
+                        )
+                        cards.append(card)
+                        self.generation_stats["by_type"]["multiple_choice"] += 1
         
         except Exception as e:
             logger.warning(f"Failed to generate multiple choice cards for {topic.name}: {e}")
         
         return cards
+    
+    def _is_unique_card(self, card: Flashcard) -> bool:
+        """Check if card is unique (not a duplicate)."""
+        if card.source_hash in self.generated_cards:
+            self.generation_stats["duplicates_avoided"] += 1
+            return False
+        return True
+    
+    def _register_card(self, card: Flashcard) -> None:
+        """Register card as generated to avoid duplicates."""
+        self.generated_cards.add(card.source_hash)
+        self.generation_stats["total_cards"] += 1
+    
+    def validate_card_format(self, card: Flashcard) -> bool:
+        """
+        Validate that a card follows proper RemNote formatting rules.
+        
+        Args:
+            card: Flashcard to validate
+            
+        Returns:
+            True if card format is valid for RemNote import
+        """
+        # Basic content validation
+        if not card.front:
+            return False
+            
+        # For most card types, back content is required
+        if card.card_type != CardType.CLOZE and not card.back and not card.list_items:
+            return False
+            
+        # Validate cloze cards have proper format
+        if card.card_type == CardType.CLOZE:
+            if not ('{{' in card.front and '}}' in card.front):
+                return False
+        
+        # List cards should have list items
+        if card.card_type in [CardType.LIST_ANSWER, CardType.MULTIPLE_CHOICE]:
+            if not card.list_items:
+                return False
+                
+        # Check for unescaped delimiters (only flag if they appear to be unintentional)
+        dangerous_patterns = [':::', '>>>', ';;;']  # Multi-line delimiters in single-line content
+        for pattern in dangerous_patterns:
+            if pattern in card.front or pattern in card.back:
+                # Allow if this is actually a multi-line card
+                if not (card.is_multiline or 'multiline' in card.card_type.value.lower()):
+                    logger.warning(f"Potential delimiter conflict in card: {card.front[:50]}...")
+                    return False
+                
+        return True
         
     def get_stats(self) -> Dict:
         """Get generation statistics."""

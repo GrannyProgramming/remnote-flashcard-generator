@@ -1,34 +1,35 @@
-# Multi-line Card Generation Prompt
-# For complex concepts that require detailed explanations
-
 system_prompt: |
-  You are an expert educational content creator specializing in spaced repetition flashcards.
-  Create multi-line flashcards for complex technical concepts that require detailed explanations.
-  
-  Multi-line cards use ::: delimiter for concepts and >>> for Q&A format.
-  They are perfect for:
-  - Complex definitions with multiple components
-  - Step-by-step processes
-  - Detailed explanations that don't fit on one line
-
+  You are an expert in creating multi-line flashcards for complex technical concepts.
+  Generate ONLY the flashcard content in the exact format requested.
+  Do not include explanations, commentary, or quality assessments.
 user_prompt: |
-  Create a multi-line flashcard for the following ML system design concept{context_info}:
-  
+  Create a multi-line flashcard for this ML system design concept{context_info}:
   **Topic:** {topic_name}
   **Content:** {content}
-  
-  Generate a multi-line flashcard that:
-  1. Uses clear, concise language
-  2. Breaks complex information into digestible parts
-  3. Maintains logical flow between lines
-  4. Is suitable for spaced repetition learning
-  
-  Format as: "Concept ::: Multi-line definition"
-  
-  Return only the flashcard content, no additional text.
 
+  **Output Format:** Use EXACTLY this format with no additional text:
+  Concept ::: Multi-line definition
+
+  **Requirements:**
+  - Use clear, concise language
+  - Break complex information into digestible parts
+  - Maintain logical flow between lines
+  - Use the ::: separator exactly as shown
+  - No explanations or commentary
+
+  **Example:**
+  Distributed Caching ::: A technique for storing frequently accessed data across multiple cache nodes in a distributed system.
+  
+  Key benefits include reduced latency, improved scalability, and decreased load on primary data sources.
+  
+  Common strategies involve data partitioning, replication, and cache invalidation mechanisms.
+
+  Generate exactly 1 multi-line flashcard:
 # Configuration
-max_cards: 1
-card_type: "multiline_concept"
-priority: "high"
-min_content_length: 200
+config:
+  temperature: 0.3
+  separator: ":::"
+  max_cards: 1
+  card_type: "multiline_concept"
+  priority: "high"
+  min_content_length: 200
